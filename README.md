@@ -1,39 +1,58 @@
-# Perspective crop
-Simple vanilla javascript image crop with perspective adjust.
+# DocCropper
 
-## Frontend
+🗂️ *DocCropper* is a fork of [`varna9000/image-perspective-crop`](https://github.com/varna9000/image-perspective-crop), enhanced to support:
 
-This project uses [Interact.JS](https://github.com/taye/interact.js) for handling the dragging corners. The code doesn't actually do the crop, but rather allows the user to set freely four corners of the image and gets the coordinates of the four adjusted points. 
+- ✅ Multi-image upload
+- 📐 Batch perspective correction
+- 📄 Export to PDF
+- 🧰 LAN-ready setup for document stations
 
-The front end has been refactored partially with AI help. All Javascript is now in separated file `static/app.js`
+---
 
-The form submits the following parameters:
-`original_height` and `original_width`  size of the original image  (width,height)
-`points`  array containing x an y of the four adjusted points (top-left, top-right, bottom-right, bottom-left)
-`image_file`  original uploaded file
+## 🔧 Frontend
 
+This project uses [Interact.JS](https://github.com/taye/interact.js) for managing draggable corner points.
 
-## Backend
+The frontend allows the user to:
+- Upload one or more images (multi-upload planned)
+- Manually adjust the four corners of each image
+- Submit data (image, coordinates, size) to the backend
 
-Python's FastApi and Gunicorn server which processes the image:
- - cropping the image according to the user adjusted points
- - adjusting the perspective
- - applying sharp mask to clean any blurring
+All JavaScript is contained in `static/app.js`.
 
+### Data sent to backend:
+- `original_height`, `original_width`: dimensions of the image
+- `points`: coordinates of the 4 corners (TL, TR, BR, BL)
+- `image_file`: the uploaded file
 
-### Installing backend
+---
 
-```
-cd project-dir
-python3 -m venv env
-source env/bin/activate
+## 🐍 Backend
+
+Implemented with **FastAPI** + **Uvicorn**, the backend:
+
+- Applies a perspective transformation
+- Crops the image to corrected bounds
+- Applies optional sharpening filter
+- Saves or returns the corrected image
+- (soon) Compiles all processed images into a single **PDF**
+
+---
+
+## 🚀 Setup Instructions
+
+### 🧱 Create virtual environment
+
+```bash
+cd doccropper
+python -m venv venv
+venv\Scripts\activate        # On Windows
+# OR
+source venv/bin/activate     # On Linux/macOS
+
 pip install --upgrade pip
 pip install -r requirements.txt
-```
 
-### Run backend
-
-`uvicorn main:app`
 
 You could use other server-side languages or tools for this processing (e.g. Imagemagick).
 
