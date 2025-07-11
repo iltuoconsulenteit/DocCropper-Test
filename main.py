@@ -249,20 +249,27 @@ async def create_pdf(
                 col = j % cols
                 row = j // cols
                 temp = img.copy()
-                temp.thumbnail((cell_w, cell_h), Image.LANCZOS)
-                offset_x = col * cell_w + (cell_w - temp.width) // 2
-                offset_y = row * cell_h + (cell_h - temp.height) // 2
+                # scale image to fill the cell, allowing upscale
+                ratio = min(cell_w / temp.width, cell_h / temp.height)
+                new_w = max(1, int(temp.width * ratio))
+                new_h = max(1, int(temp.height * ratio))
+                temp = temp.resize((new_w, new_h), Image.LANCZOS)
+                offset_x = col * cell_w + (cell_w - new_w) // 2
+                offset_y = row * cell_h + (cell_h - new_h) // 2
                 page.paste(temp, (offset_x, offset_y))
             if not licensed:
                 from PIL import ImageDraw, ImageFont
                 draw = ImageDraw.Draw(page)
-                font = ImageFont.load_default()
                 text = "DEMO"
+                try:
+                    font_size = min(page_w, page_h) // 8
+                    font = ImageFont.truetype("DejaVuSans.ttf", font_size)
+                except Exception:
+                    font = ImageFont.load_default()
                 try:
                     bbox = draw.textbbox((0, 0), text, font=font)
                     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 except AttributeError:
-                    # Fallback for Pillow < 8.0
                     tw, th = draw.textsize(text, font=font)
                 draw.text(
                     ((page_w - tw) / 2, (page_h - th) / 2),

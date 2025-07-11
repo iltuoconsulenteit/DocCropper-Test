@@ -33,7 +33,7 @@ After all images are processed, choose how many images appear on each page and w
 The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. Place your own images inside `static/logos/` and reference them from `static/index.html`.
 The expected filenames are `header_logo.png` for the top banner and `footer_logo.png` for the footer. If these files are missing, the placeholders will be used automatically.
 Default preferences for language, PDF layout and page orientation are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.
-Without a valid license key in `settings.json` the exported PDF includes a "DEMO" watermark.
+Without a valid license key in `settings.json` the exported PDF includes a large "DEMO" watermark centered on each page.
 Language JSON files live in `static/lang/`. Add additional translations by creating new `<code>lang.json</code>` files and updating the language selector.
 Processed images appear as thumbnails. Each thumbnail offers **Rotate**, **Edit**, and **Delete** buttons so you can refine the results. Click a thumbnail itself to view it in a modal overlay.
 
@@ -49,6 +49,7 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Saves or returns the corrected image
 - Compiles all processed images into a single **PDF**, arranging up to four per page
 - Supports portrait or landscape page orientation; when using two images per page, landscape arranges them horizontally
+- Images are scaled to fill their allotted space in each page for a cleaner layout
 
 ---
 
