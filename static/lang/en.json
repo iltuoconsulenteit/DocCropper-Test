@@ -1,0 +1,21 @@
+{
+  "uploadLabel": "Upload Document Image(s):",
+  "processImage": "Process Image",
+  "exportPdf": "Export PDF",
+  "imagesPerPage": "Images per page:",
+  "orientation": "Orientation:",
+  "portrait": "Portrait",
+  "landscape": "Landscape",
+  "scaleLabel": "Image size:",
+  "fill": "Fill cell",
+  "original": "Original",
+  "percent": "Scale (%)",
+  "processedImages": "Processed Images:",
+  "rotate": "Rotate",
+  "edit": "Edit",
+  "delete": "Delete",
+  "realizzato": "Powered by IlTuoConsulenteIT",
+  "language": "Language:",
+  "english": "English",
+  "italian": "Italiano"
+}
