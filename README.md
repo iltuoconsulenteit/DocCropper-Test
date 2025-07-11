@@ -19,7 +19,7 @@ The frontend allows the user to:
 - Submit data (image, coordinates, size) to the backend
 - Export all processed images to PDF
 - Choose how many processed images appear on each PDF page
-- Select portrait or landscape orientation for the PDF
+- Select portrait or landscape orientation for the PDF. With two images per page, landscape places them side by side while portrait stacks them vertically
 
 All JavaScript is contained in `static/app.js`.
 
@@ -42,7 +42,7 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Applies optional sharpening filter
 - Saves or returns the corrected image
 - Compiles all processed images into a single **PDF**, arranging up to four per page
-- Supports portrait or landscape page orientation
+- Supports portrait or landscape page orientation; when using two images per page, landscape arranges them horizontally
 
 ---
 

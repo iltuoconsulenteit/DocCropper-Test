@@ -193,7 +193,10 @@ async def create_pdf(
         cols = 1
         rows = 1
         if layout == 2:
-            cols, rows = 1, 2
+            if orientation == "landscape":
+                cols, rows = 2, 1
+            else:
+                cols, rows = 1, 2
         elif layout == 4:
             cols, rows = 2, 2
 
