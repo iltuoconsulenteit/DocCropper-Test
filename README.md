@@ -73,7 +73,7 @@ You could use other server-side languages or tools for this processing (e.g. Ima
 
 ### 🛠 Install script
 
-Run `./install_DocCropper.sh` to clone or update the project in `~/Scrivania/DocCropper`. The script checks for `git`, `python3`, and `pip3`. When updating it automatically stashes any local changes, performs `git pull --rebase` and then restores the stashed work so your edits aren't lost.
+Run `./install_DocCropper.sh` to clone or update the project in `~/Scrivania/DocCropper`. The script checks for `git`, `python3`, and `pip3`. When updating it automatically stashes any tracked or untracked changes, performs `git pull --rebase`, and then restores the stashed work so your edits aren't lost. This avoids errors like "your local changes would be overwritten" when `settings.json` or other files have been modified locally.
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 
