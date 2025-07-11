@@ -261,6 +261,9 @@ async def create_pdf(
             scale_mode = "fit"
         cell_w = page_w // cols
         cell_h = page_h // rows
+        margin = 40  # pixels of padding around each image
+        inner_w = max(1, cell_w - margin * 2)
+        inner_h = max(1, cell_h - margin * 2)
 
         pages = []
         TARGET_DPI = 300
@@ -277,19 +280,19 @@ async def create_pdf(
                 if scale_mode == "percent":
                     ratio = max(0.01, scale_percent / 100.0) * dpi_ratio
                 elif scale_mode == "fit":
-                    ratio = min(cell_w / temp.width, cell_h / temp.height)
+                    ratio = min(inner_w / temp.width, inner_h / temp.height)
                 else:  # original
                     ratio = dpi_ratio
 
-                max_ratio = min(cell_w / temp.width, cell_h / temp.height)
+                max_ratio = min(inner_w / temp.width, inner_h / temp.height)
                 if ratio > max_ratio:
                     ratio = max_ratio
 
                 new_w = max(1, int(temp.width * ratio))
                 new_h = max(1, int(temp.height * ratio))
                 temp = temp.resize((new_w, new_h), Image.LANCZOS)
-                offset_x = col * cell_w + (cell_w - new_w) // 2
-                offset_y = row * cell_h + (cell_h - new_h) // 2
+                offset_x = col * cell_w + margin + (inner_w - new_w) // 2
+                offset_y = row * cell_h + margin + (inner_h - new_h) // 2
                 page.paste(temp, (offset_x, offset_y))
             if not licensed:
                 from PIL import ImageDraw, ImageFont

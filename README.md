@@ -25,6 +25,7 @@ The frontend allows the user to:
   When using **Original** or **100%** the generator now adjusts for the image's
   DPI so photos scanned at 150–200 DPI render closer to real size on a 300 DPI
   PDF page.
+- A small margin is applied around each image so nothing touches the page edges
 - Change the interface language (Italian translation included)
 
 All JavaScript is contained in `static/app.js`.
@@ -55,6 +56,7 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Compiles all processed images into a single **PDF**, arranging up to four per page
 - Supports portrait or landscape page orientation; when using two images per page, landscape arranges them horizontally
 - Images can be scaled per page: fill the cell, keep original size or apply a custom percentage
+- A margin is always kept around each image so they don't run into the edges when printed
 
 ---
 
