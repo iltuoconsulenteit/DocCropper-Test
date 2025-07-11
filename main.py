@@ -248,27 +248,31 @@ async def create_pdf(
         cell_h = page_h // rows
 
         pages = []
+        TARGET_DPI = 300
         for i in range(0, len(pil_images), layout):
             page = Image.new("RGB", (page_w, page_h), "white")
             for j, img in enumerate(pil_images[i:i+layout]):
                 col = j % cols
                 row = j // cols
                 temp = img.copy()
+
+                img_dpi = temp.info.get("dpi", (72, 72))[0] or 72
+                dpi_ratio = TARGET_DPI / img_dpi
+
                 if scale_mode == "percent":
-                    ratio = max(0.01, scale_percent / 100.0)
+                    ratio = max(0.01, scale_percent / 100.0) * dpi_ratio
                 elif scale_mode == "fit":
                     ratio = min(cell_w / temp.width, cell_h / temp.height)
                 else:  # original
-                    ratio = 1.0
+                    ratio = dpi_ratio
+
+                max_ratio = min(cell_w / temp.width, cell_h / temp.height)
+                if ratio > max_ratio:
+                    ratio = max_ratio
 
                 new_w = max(1, int(temp.width * ratio))
                 new_h = max(1, int(temp.height * ratio))
                 temp = temp.resize((new_w, new_h), Image.LANCZOS)
-                if new_w > cell_w or new_h > cell_h:
-                    left = max(0, (new_w - cell_w) // 2)
-                    top = max(0, (new_h - cell_h) // 2)
-                    temp = temp.crop((left, top, left + min(cell_w, new_w), top + min(cell_h, new_h)))
-                    new_w, new_h = temp.size
                 offset_x = col * cell_w + (cell_w - new_w) // 2
                 offset_y = row * cell_h + (cell_h - new_h) // 2
                 page.paste(temp, (offset_x, offset_y))

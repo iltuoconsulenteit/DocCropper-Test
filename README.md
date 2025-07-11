@@ -20,7 +20,10 @@ The frontend allows the user to:
 - Export all processed images to PDF
 - Choose how many processed images appear on each PDF page
 - Select portrait or landscape orientation for the PDF. With two images per page, landscape places them side by side while portrait stacks them vertically
-- Control how images are scaled on each page: fill the cell, keep original size or apply a custom percentage
+- Control how images are scaled on each page: fill the cell, keep original size or apply a custom percentage.
+  When using **Original** or **100%** the generator now adjusts for the image's
+  DPI so photos scanned at 150–200 DPI render closer to real size on a 300 DPI
+  PDF page.
 - Change the interface language (Italian translation included)
 
 All JavaScript is contained in `static/app.js`.
