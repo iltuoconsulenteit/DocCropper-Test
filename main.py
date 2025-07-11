@@ -17,7 +17,7 @@ SETTINGS_FILE = "settings.json"
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
-        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
+        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": "", "license_name": ""}
         with open(SETTINGS_FILE, "w") as fh:
             json.dump(data, fh)
         return data
@@ -25,7 +25,7 @@ def load_settings():
         with open(SETTINGS_FILE) as fh:
             return json.load(fh)
     except Exception:
-        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
+        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": "", "license_name": ""}
 
 def save_settings(update: dict):
     data = load_settings()

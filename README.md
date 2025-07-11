@@ -83,3 +83,20 @@ Run `./install_DocCropper.sh` to clone or update the project in `~/Scrivania/Doc
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 
+## 🔓 Licenza e versione commerciale
+
+**DocCropper** è distribuito con licenza [MIT](LICENSE.txt). Senza una chiave valida il programma rimane in modalità **DEMO**. In questo caso le funzioni professionali sono visibili ma disabilitate e l'esportazione PDF contiene un vistoso watermark.
+
+### 💼 Funzionalità PRO
+
+- caricamento multiplo di immagini nella stessa sessione
+- esportazione PDF multipagina
+- moduli OCR e salvataggio su cartelle di rete (in sviluppo)
+- accesso LAN con autenticazione
+
+### 💰 Costi e attivazione
+
+L'acquisto della licenza PRO fornisce un file `license.key` e l'indicazione del nominativo a cui è intestata. Inserendo questo file nella cartella del progetto l'interfaccia mostrerà "Licenziato a &lt;nome&gt;" e tutte le funzioni saranno abilitate.
+
+Per informazioni commerciali: **DocCropper@iltuoconsulenteit.it**.
+

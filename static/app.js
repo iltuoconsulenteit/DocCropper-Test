@@ -29,6 +29,10 @@ const modalImage = document.getElementById('modalImage');
 const closeModal = document.getElementById('closeModal');
 const langSelect = document.getElementById('langSelect');
 const layoutPreview = document.getElementById('layoutPreview');
+const licenseInfo = document.getElementById('licenseInfo');
+
+let isLicensed = false;
+let licenseName = '';
 
 let files = [];
 let currentFileIndex = 0;
@@ -639,6 +643,26 @@ scalePercent.addEventListener('change', () => {
     saveSettings({ scale_percent: parseInt(scalePercent.value || '100') });
 });
 
+function applyProStatus() {
+    if (!isLicensed) {
+        exportPdfBtn.classList.add('pro-disabled');
+        layoutSelect.disabled = true;
+        orientationSelect.disabled = true;
+        arrangeSelect.disabled = true;
+        scaleMode.disabled = true;
+        scalePercent.disabled = true;
+        imageUploadElement.multiple = false;
+    } else {
+        exportPdfBtn.classList.remove('pro-disabled');
+        layoutSelect.disabled = false;
+        orientationSelect.disabled = false;
+        arrangeSelect.disabled = false;
+        scaleMode.disabled = false;
+        scalePercent.disabled = false;
+        imageUploadElement.multiple = true;
+    }
+}
+
 // initial load of settings and translations
 loadSettings().then(async (cfg) => {
     if (cfg.language) {
@@ -661,8 +685,16 @@ loadSettings().then(async (cfg) => {
     if (cfg.scale_percent !== undefined) {
         scalePercent.value = cfg.scale_percent;
     }
+    if (cfg.license_key) {
+        isLicensed = cfg.license_key === 'VALID';
+    }
+    if (cfg.license_name) {
+        licenseName = cfg.license_name;
+    }
     await loadTranslations(currentLang);
     applyTranslations();
+    licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
+    applyProStatus();
     updateLayoutPreview();
 });
 

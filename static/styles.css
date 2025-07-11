@@ -21,6 +21,14 @@ h1, h2 {
     right: 10px;
 }
 
+#licenseInfo {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 0.8em;
+    color: #555;
+}
+
 #pageFooter {
     text-align: center;
     margin-top: 20px;
@@ -201,4 +209,9 @@ button:hover {
     font-size: 40px;
     font-weight: bold;
     cursor: pointer;
+}
+
+.pro-disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
