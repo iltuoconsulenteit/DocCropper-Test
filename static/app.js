@@ -28,10 +28,93 @@ const closeModal = document.getElementById('closeModal');
 let files = [];
 let currentFileIndex = 0;
 let processedImages = [];
+let processedFiles = [];
+let editingIndex = null;
 
 function openModal(src) {
     modalImage.src = src;
     imageModal.style.display = 'block';
+}
+
+function rotateImage(index) {
+    const img = new Image();
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.height;
+        canvas.height = img.width;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        const rotatedData = canvas.toDataURL('image/png');
+        processedImages[index] = rotatedData;
+        const container = processedGallery.children[index];
+        container.querySelector('img').src = rotatedData;
+    };
+    img.src = processedImages[index];
+}
+
+function deleteImage(index) {
+    processedImages.splice(index, 1);
+    processedFiles.splice(index, 1);
+    processedGallery.removeChild(processedGallery.children[index]);
+    if (processedImages.length === 0) {
+        exportPdfBtn.style.display = 'none';
+        layoutControls.style.display = 'none';
+    }
+}
+
+function editImage(index) {
+    editingIndex = index;
+    const file = processedFiles[index];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        setupImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+    exportPdfBtn.style.display = 'none';
+    layoutControls.style.display = 'none';
+    statusMessageElement.textContent = 'Edit image and press Process Image to save.';
+}
+
+function addThumbnail(src, index) {
+    const container = document.createElement('div');
+    container.className = 'thumbContainer';
+
+    const imgEl = document.createElement('img');
+    imgEl.src = src;
+    imgEl.addEventListener('click', () => openModal(src));
+    container.appendChild(imgEl);
+
+    const btns = document.createElement('div');
+    btns.className = 'thumbButtons';
+
+    const rotateBtn = document.createElement('button');
+    rotateBtn.textContent = 'Rotate';
+    rotateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateImage(index);
+    });
+    btns.appendChild(rotateBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        editImage(index);
+    });
+    btns.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Delete';
+    delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteImage(index);
+    });
+    btns.appendChild(delBtn);
+
+    container.appendChild(btns);
+    processedGallery.appendChild(container);
 }
 
 closeModal.addEventListener('click', () => {
@@ -224,6 +307,8 @@ imageUploadElement.addEventListener('change', (event) => {
     files = Array.from(event.target.files);
     currentFileIndex = 0;
     processedImages = [];
+    processedFiles = [];
+    editingIndex = null;
     processedGallery.innerHTML = '';
     exportPdfBtn.style.display = 'none';
     layoutControls.style.display = 'none';
@@ -286,7 +371,7 @@ submitBtn.addEventListener('click', () => {
     // console.log(`origW (natural): ${origW}, origH (natural): ${origH}`);
     // console.log("pointsForBackend (scaled to original image):", JSON.stringify(pointsForBackend));
 
-    const currentFile = files[currentFileIndex];
+    const currentFile = editingIndex !== null ? processedFiles[editingIndex] : files[currentFileIndex];
     const formData = new FormData();
     formData.append('image_file', currentFile);
     formData.append('points', JSON.stringify(pointsForBackend));
@@ -305,28 +390,35 @@ submitBtn.addEventListener('click', () => {
     })
     .then(data => {
         if (data.processed_image) {
-            processedImages.push(data.processed_image);
             processedImageElement.src = data.processed_image;
             openModal(data.processed_image);
-            const thumb = document.createElement('img');
-            thumb.src = data.processed_image;
-            thumb.addEventListener('click', () => {
-                openModal(thumb.src);
-            });
-            processedGallery.appendChild(thumb);
-            currentFileIndex++;
-            if (currentFileIndex < files.length) {
-                statusMessageElement.textContent = 'Image processed. Load next...';
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    setupImage(e.target.result);
-                };
-                reader.readAsDataURL(files[currentFileIndex]);
-            } else {
-                statusMessageElement.textContent = 'All images processed.';
+            if (editingIndex !== null) {
+                processedImages[editingIndex] = data.processed_image;
+                const container = processedGallery.children[editingIndex];
+                container.querySelector('img').src = data.processed_image;
+                editingIndex = null;
+                statusMessageElement.textContent = 'Image reprocessed.';
                 wrapperElement.style.display = 'none';
                 exportPdfBtn.style.display = 'inline-block';
                 layoutControls.style.display = 'block';
+            } else {
+                processedImages.push(data.processed_image);
+                processedFiles.push(currentFile);
+                addThumbnail(data.processed_image, processedImages.length - 1);
+                currentFileIndex++;
+                if (currentFileIndex < files.length) {
+                    statusMessageElement.textContent = 'Image processed. Load next...';
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        setupImage(e.target.result);
+                    };
+                    reader.readAsDataURL(files[currentFileIndex]);
+                } else {
+                    statusMessageElement.textContent = 'All images processed.';
+                    wrapperElement.style.display = 'none';
+                    exportPdfBtn.style.display = 'inline-block';
+                    layoutControls.style.display = 'block';
+                }
             }
         } else {
             statusMessageElement.textContent = data.message || 'Failed to process image.';

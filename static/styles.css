@@ -118,6 +118,23 @@ button:hover {
     gap: 10px;
 }
 
+.thumbContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.thumbButtons {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.thumbButtons button {
+    padding: 2px 6px;
+    font-size: 0.8em;
+}
+
 #processedGallery img {
     max-width: 150px;
     border: 1px solid #ddd;
