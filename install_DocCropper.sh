@@ -17,7 +17,16 @@ if [ -d "$TARGET_DIR/.git" ]; then
   read -r -p "🔄 Vuoi aggiornare il repository da GitHub? [s/N] " ans
   if [[ "$ans" =~ ^[sS]$ ]]; then
     echo "📥 Aggiornamento repository..."
+    if [ -n "$(git -C "$TARGET_DIR" status --porcelain)" ]; then
+      echo "💾 Modifiche locali rilevate: eseguo stash temporaneo..."
+      git -C "$TARGET_DIR" stash push -u -m "pre-update-$(date +%s)"
+      STASHED=true
+    fi
     git -C "$TARGET_DIR" pull --rebase
+    if [ "$STASHED" = true ]; then
+      echo "↩️  Ripristino modifiche locali..."
+      git -C "$TARGET_DIR" stash pop || true
+    fi
   fi
 else
   echo "📥 Clonazione repository..."
