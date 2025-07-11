@@ -119,3 +119,7 @@ footer {
     background: #fff;
     cursor: pointer;
 }
+
+#layoutControls {
+    margin-bottom: 10px;
+}

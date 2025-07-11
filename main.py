@@ -165,7 +165,10 @@ async def process_image(
 
 
 @app.post("/create-pdf/")
-async def create_pdf(images: list[str] = Body(...)):
+async def create_pdf(
+    images: list[str] = Body(...),
+    layout: int = Body(1)
+):
     try:
         pil_images = []
         for img_b64 in images:
@@ -178,8 +181,37 @@ async def create_pdf(images: list[str] = Body(...)):
         if not pil_images:
             return JSONResponse(status_code=400, content={"message": "No images provided"})
 
+        layout = max(1, layout)
+        if layout not in (1, 2, 4):
+            layout = 1
+
+        cols = 1
+        rows = 1
+        if layout == 2:
+            cols, rows = 1, 2
+        elif layout == 4:
+            cols, rows = 2, 2
+
+        A4_WIDTH = 2480
+        A4_HEIGHT = 3508
+        cell_w = A4_WIDTH // cols
+        cell_h = A4_HEIGHT // rows
+
+        pages = []
+        for i in range(0, len(pil_images), layout):
+            page = Image.new("RGB", (A4_WIDTH, A4_HEIGHT), "white")
+            for j, img in enumerate(pil_images[i:i+layout]):
+                col = j % cols
+                row = j // cols
+                temp = img.copy()
+                temp.thumbnail((cell_w, cell_h), Image.LANCZOS)
+                offset_x = col * cell_w + (cell_w - temp.width) // 2
+                offset_y = row * cell_h + (cell_h - temp.height) // 2
+                page.paste(temp, (offset_x, offset_y))
+            pages.append(page)
+
         pdf_bytes_io = io.BytesIO()
-        pil_images[0].save(pdf_bytes_io, format="PDF", save_all=True, append_images=pil_images[1:])
+        pages[0].save(pdf_bytes_io, format="PDF", save_all=True, append_images=pages[1:])
         pdf_bytes = pdf_bytes_io.getvalue()
         pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
         return JSONResponse(content={"pdf": "data:application/pdf;base64," + pdf_base64})

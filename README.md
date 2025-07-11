@@ -18,6 +18,7 @@ The frontend allows the user to:
 - Manually adjust the four corners of each image
 - Submit data (image, coordinates, size) to the backend
 - Export all processed images to PDF
+- Choose how many processed images appear on each PDF page
 
 All JavaScript is contained in `static/app.js`.
 
@@ -26,7 +27,7 @@ All JavaScript is contained in `static/app.js`.
 - `points`: coordinates of the 4 corners (TL, TR, BR, BL)
 - `image_file`: the uploaded file
 
-After all images are processed, use the **Export PDF** button to download a single PDF containing all corrected pages.
+After all images are processed, choose a layout (number of images per page) and use the **Export PDF** button to download the compiled PDF.
 The interface includes placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding if desired.
 
 ---
@@ -39,7 +40,7 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Crops the image to corrected bounds
 - Applies optional sharpening filter
 - Saves or returns the corrected image
-- Compiles all processed images into a single **PDF**
+- Compiles all processed images into a single **PDF**, arranging up to four per page
 
 ---
 

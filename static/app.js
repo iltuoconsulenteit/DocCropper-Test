@@ -15,6 +15,8 @@ const fogPathElement = document.getElementById('fogPath');
 const imageUploadElement = document.getElementById('imageUpload');
 const submitBtn = document.getElementById('submitBtn');
 const exportPdfBtn = document.getElementById('exportPdfBtn');
+const layoutControls = document.getElementById('layoutControls');
+const layoutSelect = document.getElementById('layoutSelect');
 const processedImageElement = document.getElementById('processedImage');
 const processedGallery = document.getElementById('processedGallery');
 const statusMessageElement = document.getElementById('statusMessage');
@@ -205,6 +207,7 @@ imageUploadElement.addEventListener('change', (event) => {
     processedImages = [];
     processedGallery.innerHTML = '';
     exportPdfBtn.style.display = 'none';
+    layoutControls.style.display = 'none';
     if (files.length > 0) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -305,6 +308,7 @@ submitBtn.addEventListener('click', () => {
                 statusMessageElement.textContent = 'All images processed.';
                 wrapperElement.style.display = 'none';
                 exportPdfBtn.style.display = 'inline-block';
+                layoutControls.style.display = 'block';
             }
         } else {
             statusMessageElement.textContent = data.message || 'Failed to process image.';
@@ -322,10 +326,11 @@ exportPdfBtn.addEventListener('click', () => {
         return;
     }
     statusMessageElement.textContent = 'Generating PDF...';
+    const layout = parseInt(layoutSelect.value || '1');
     fetch('/create-pdf/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: processedImages })
+        body: JSON.stringify({ images: processedImages, layout })
     })
     .then(response => {
         if (!response.ok) {
