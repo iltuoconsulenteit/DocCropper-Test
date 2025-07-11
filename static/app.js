@@ -21,10 +21,28 @@ const orientationSelect = document.getElementById('orientationSelect');
 const processedImageElement = document.getElementById('processedImage');
 const processedGallery = document.getElementById('processedGallery');
 const statusMessageElement = document.getElementById('statusMessage');
+const imageModal = document.getElementById('imageModal');
+const modalImage = document.getElementById('modalImage');
+const closeModal = document.getElementById('closeModal');
 
 let files = [];
 let currentFileIndex = 0;
 let processedImages = [];
+
+function openModal(src) {
+    modalImage.src = src;
+    imageModal.style.display = 'block';
+}
+
+closeModal.addEventListener('click', () => {
+    imageModal.style.display = 'none';
+});
+
+imageModal.addEventListener('click', (e) => {
+    if (e.target === imageModal) {
+        imageModal.style.display = 'none';
+    }
+});
 
 const draggableElements = {
     p1: document.getElementById('p1'),
@@ -289,12 +307,11 @@ submitBtn.addEventListener('click', () => {
         if (data.processed_image) {
             processedImages.push(data.processed_image);
             processedImageElement.src = data.processed_image;
-            processedImageElement.style.display = 'block';
+            openModal(data.processed_image);
             const thumb = document.createElement('img');
             thumb.src = data.processed_image;
             thumb.addEventListener('click', () => {
-                processedImageElement.src = thumb.src;
-                processedImageElement.style.display = 'block';
+                openModal(thumb.src);
             });
             processedGallery.appendChild(thumb);
             currentFileIndex++;

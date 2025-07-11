@@ -30,6 +30,7 @@ All JavaScript is contained in `static/app.js`.
 
 After all images are processed, choose how many images appear on each page and whether the PDF is in portrait or landscape orientation, then use the **Export PDF** button to download it.
 The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. A convenient place for custom logos is `static/logos/` (create it if missing) and reference the files from `static/index.html`.
+Processed images appear as thumbnails. Click one to view a larger version in a modal overlay.
 
 ---
 

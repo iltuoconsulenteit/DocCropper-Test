@@ -6,8 +6,10 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <img id="headerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="DocCropper logo">
-    <h1>DocCropper</h1>
+    <header id="pageHeader">
+        <img id="headerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="DocCropper logo">
+        <h1>DocCropper</h1>
+    </header>
 
     <div>
         <label for="imageUpload">Upload Document Image(s):</label>
@@ -46,10 +48,14 @@
     <h2>Processed Images:</h2>
     <div id="processedGallery"></div>
     <img id="processedImage" src="#" alt="Processed Document" style="display:none; max-width: 100%;">
+    <div id="imageModal" class="modal" style="display:none;">
+        <span id="closeModal" class="close">&times;</span>
+        <img class="modal-content" id="modalImage" src="#" alt="Full size">
+    </div>
     <p id="statusMessage"></p>
 
-    <footer>
-        <p>Realizzato da IlTuoConsulenteIT</p>
+    <footer id="pageFooter">
+        <span>Realizzato da IlTuoConsulenteIT</span>
         <img id="footerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="IlTuoConsulenteIT logo">
     </footer>
 
