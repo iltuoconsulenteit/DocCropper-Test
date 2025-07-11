@@ -56,7 +56,11 @@ source venv/bin/activate     # On Linux/macOS
 
 pip install --upgrade pip
 pip install -r requirements.txt
-
+```
 
 You could use other server-side languages or tools for this processing (e.g. Imagemagick).
+
+### 🛠 Install script
+
+Run `./install_DocCropper.sh` to clone or update the project in `~/Scrivania/DocCropper`. The script checks for `git`, `python3`, and `pip3` before pulling the latest changes with `--rebase`.
 
