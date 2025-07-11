@@ -3,6 +3,7 @@ import io
 import logging
 import json
 import math
+import os
 
 import cv2
 import numpy as np
@@ -11,6 +12,27 @@ from fastapi import FastAPI, File, Form, UploadFile, Body
 from PIL import Image
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+
+SETTINGS_FILE = "settings.json"
+
+def load_settings():
+    if not os.path.exists(SETTINGS_FILE):
+        data = {"language": "en", "layout": 1, "orientation": "portrait", "license_key": ""}
+        with open(SETTINGS_FILE, "w") as fh:
+            json.dump(data, fh)
+        return data
+    try:
+        with open(SETTINGS_FILE) as fh:
+            return json.load(fh)
+    except Exception:
+        return {"language": "en", "layout": 1, "orientation": "portrait", "license_key": ""}
+
+def save_settings(update: dict):
+    data = load_settings()
+    data.update(update)
+    with open(SETTINGS_FILE, "w") as fh:
+        json.dump(data, fh)
+    return data
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +51,16 @@ async def read_root():
     except FileNotFoundError:
         logger.error("static/index.html not found")
         return HTMLResponse(content="Frontend not found.", status_code=500)
+
+
+@app.get("/settings/")
+async def get_settings():
+    return load_settings()
+
+
+@app.post("/settings/")
+async def update_settings(settings: dict = Body(...)):
+    return save_settings(settings)
 
 
 @app.post("/process-image/")
@@ -171,6 +203,8 @@ async def create_pdf(
     orientation: str = Body("portrait")
 ):
     try:
+        settings = load_settings()
+        licensed = settings.get("license_key") == "VALID"
         pil_images = []
         for img_b64 in images:
             if img_b64.startswith('data:'):
@@ -219,6 +253,13 @@ async def create_pdf(
                 offset_x = col * cell_w + (cell_w - temp.width) // 2
                 offset_y = row * cell_h + (cell_h - temp.height) // 2
                 page.paste(temp, (offset_x, offset_y))
+            if not licensed:
+                from PIL import ImageDraw, ImageFont
+                draw = ImageDraw.Draw(page)
+                font = ImageFont.load_default()
+                text = "DEMO"
+                tw, th = draw.textsize(text, font=font)
+                draw.text(((page_w - tw) / 2, (page_h - th) / 2), text, fill=(255,0,0), font=font)
             pages.append(page)
 
         pdf_bytes_io = io.BytesIO()

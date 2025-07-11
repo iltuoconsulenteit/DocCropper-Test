@@ -35,6 +35,26 @@ let editingIndex = null;
 let translations = {};
 let currentLang = 'en';
 
+async function loadSettings() {
+    try {
+        const resp = await fetch('/settings/');
+        if (resp.ok) {
+            return await resp.json();
+        }
+    } catch (e) {
+        console.error('Failed to load settings', e);
+    }
+    return {};
+}
+
+function saveSettings(data) {
+    fetch('/settings/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).catch(e => console.error('Save settings error', e));
+}
+
 async function loadTranslations(lang) {
     try {
         const resp = await fetch(`/static/lang/${lang}.json`);
@@ -528,10 +548,32 @@ langSelect.addEventListener('change', async () => {
     currentLang = langSelect.value;
     await loadTranslations(currentLang);
     applyTranslations();
+    saveSettings({ language: currentLang });
 });
 
-// initial load
-loadTranslations(currentLang).then(applyTranslations);
+layoutSelect.addEventListener('change', () => {
+    saveSettings({ layout: parseInt(layoutSelect.value || '1') });
+});
+
+orientationSelect.addEventListener('change', () => {
+    saveSettings({ orientation: orientationSelect.value });
+});
+
+// initial load of settings and translations
+loadSettings().then(async (cfg) => {
+    if (cfg.language) {
+        currentLang = cfg.language;
+        langSelect.value = cfg.language;
+    }
+    if (cfg.layout) {
+        layoutSelect.value = cfg.layout;
+    }
+    if (cfg.orientation) {
+        orientationSelect.value = cfg.orientation;
+    }
+    await loadTranslations(currentLang);
+    applyTranslations();
+});
 
 if (window.safari) {
     history.pushState(null, null, location.href);

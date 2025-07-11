@@ -10,8 +10,15 @@ h1, h2 {
 }
 
 #pageHeader {
+    position: relative;
     text-align: center;
     margin-bottom: 10px;
+}
+
+#languageChoice {
+    position: absolute;
+    top: 5px;
+    right: 10px;
 }
 
 #pageFooter {
