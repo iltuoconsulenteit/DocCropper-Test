@@ -18,6 +18,7 @@ const exportPdfBtn = document.getElementById('exportPdfBtn');
 const layoutControls = document.getElementById('layoutControls');
 const layoutSelect = document.getElementById('layoutSelect');
 const orientationSelect = document.getElementById('orientationSelect');
+const arrangeSelect = document.getElementById('arrangeSelect');
 const scaleMode = document.getElementById('scaleMode');
 const scalePercent = document.getElementById('scalePercent');
 const processedImageElement = document.getElementById('processedImage');
@@ -27,6 +28,7 @@ const imageModal = document.getElementById('imageModal');
 const modalImage = document.getElementById('modalImage');
 const closeModal = document.getElementById('closeModal');
 const langSelect = document.getElementById('langSelect');
+const layoutPreview = document.getElementById('layoutPreview');
 
 let files = [];
 let currentFileIndex = 0;
@@ -96,12 +98,61 @@ function applyTranslations() {
             opt.textContent = translations[k];
         }
     });
+    arrangeSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
     processedGallery.querySelectorAll('.thumbButtons button').forEach(btn => {
         const key = btn.dataset.key;
         if (translations[key]) {
             btn.textContent = translations[key];
         }
     });
+}
+
+function calculateGrid() {
+    const layout = parseInt(layoutSelect.value || '1');
+    const orientation = orientationSelect.value || 'portrait';
+    const arrangement = arrangeSelect.value || 'auto';
+    let cols = 1, rows = 1;
+    if (layout === 2) {
+        if (arrangement === 'horizontal') {
+            cols = 2; rows = 1;
+        } else if (arrangement === 'vertical') {
+            cols = 1; rows = 2;
+        } else if (arrangement === 'auto') {
+            if (orientation === 'landscape') { cols = 2; rows = 1; } else { cols = 1; rows = 2; }
+        }
+    } else if (layout === 4) {
+        if (arrangement === 'horizontal') {
+            cols = 4; rows = 1;
+        } else if (arrangement === 'vertical') {
+            cols = 1; rows = 4;
+        } else { // grid or auto
+            cols = 2; rows = 2;
+        }
+    }
+    return {cols, rows};
+}
+
+function updateLayoutPreview() {
+    const {cols, rows} = calculateGrid();
+    layoutPreview.innerHTML = '';
+    const orientation = orientationSelect.value || 'portrait';
+    layoutPreview.style.display = 'block';
+    layoutPreview.style.width = orientation === 'portrait' ? '200px' : '250px';
+    layoutPreview.style.height = orientation === 'portrait' ? '250px' : '200px';
+    layoutPreview.style.display = 'grid';
+    layoutPreview.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    layoutPreview.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    const total = cols * rows;
+    for (let i = 0; i < total; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        layoutPreview.appendChild(cell);
+    }
 }
 
 function openModal(src) {
@@ -487,6 +538,7 @@ submitBtn.addEventListener('click', () => {
                 wrapperElement.style.display = 'none';
                 exportPdfBtn.style.display = 'inline-block';
                 layoutControls.style.display = 'block';
+                updateLayoutPreview();
             } else {
                 processedImages.push(data.processed_image);
                 processedFiles.push(currentFile);
@@ -504,6 +556,7 @@ submitBtn.addEventListener('click', () => {
                     wrapperElement.style.display = 'none';
                     exportPdfBtn.style.display = 'inline-block';
                     layoutControls.style.display = 'block';
+                    updateLayoutPreview();
                 }
             }
         } else {
@@ -524,12 +577,13 @@ exportPdfBtn.addEventListener('click', () => {
     statusMessageElement.textContent = 'Generating PDF...';
     const layout = parseInt(layoutSelect.value || '1');
     const orientation = orientationSelect.value || 'portrait';
+    const arrangement = arrangeSelect.value || 'auto';
     const scale_mode = scaleMode.value || 'fit';
     const scale_percent = parseInt(scalePercent.value || '100');
     fetch('/create-pdf/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: processedImages, layout, orientation, scale_mode, scale_percent })
+        body: JSON.stringify({ images: processedImages, layout, orientation, arrangement, scale_mode, scale_percent })
     })
     .then(response => {
         if (!response.ok) {
@@ -562,11 +616,18 @@ langSelect.addEventListener('change', async () => {
 });
 
 layoutSelect.addEventListener('change', () => {
+    updateLayoutPreview();
     saveSettings({ layout: parseInt(layoutSelect.value || '1') });
 });
 
 orientationSelect.addEventListener('change', () => {
+    updateLayoutPreview();
     saveSettings({ orientation: orientationSelect.value });
+});
+
+arrangeSelect.addEventListener('change', () => {
+    updateLayoutPreview();
+    saveSettings({ arrangement: arrangeSelect.value });
 });
 
 scaleMode.addEventListener('change', () => {
@@ -590,6 +651,9 @@ loadSettings().then(async (cfg) => {
     if (cfg.orientation) {
         orientationSelect.value = cfg.orientation;
     }
+    if (cfg.arrangement) {
+        arrangeSelect.value = cfg.arrangement;
+    }
     if (cfg.scale_mode) {
         scaleMode.value = cfg.scale_mode;
         scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
@@ -599,6 +663,7 @@ loadSettings().then(async (cfg) => {
     }
     await loadTranslations(currentLang);
     applyTranslations();
+    updateLayoutPreview();
 });
 
 if (window.safari) {

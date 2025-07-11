@@ -17,7 +17,7 @@ SETTINGS_FILE = "settings.json"
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
-        data = {"language": "en", "layout": 1, "orientation": "portrait", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
+        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
         with open(SETTINGS_FILE, "w") as fh:
             json.dump(data, fh)
         return data
@@ -25,7 +25,7 @@ def load_settings():
         with open(SETTINGS_FILE) as fh:
             return json.load(fh)
     except Exception:
-        return {"language": "en", "layout": 1, "orientation": "portrait", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
+        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
 
 def save_settings(update: dict):
     data = load_settings()
@@ -201,6 +201,7 @@ async def create_pdf(
     images: list[str] = Body(...),
     layout: int = Body(1),
     orientation: str = Body("portrait"),
+    arrangement: str = Body("auto"),
     scale_mode: str = Body("fit"),
     scale_percent: int = Body(100)
 ):
@@ -222,6 +223,10 @@ async def create_pdf(
         if layout not in (1, 2, 4):
             layout = 1
 
+        arrangement = arrangement.lower()
+        if arrangement not in ("auto", "vertical", "horizontal", "grid"):
+            arrangement = "auto"
+
         orientation = orientation.lower()
         if orientation not in ("portrait", "landscape"):
             orientation = "portrait"
@@ -229,12 +234,22 @@ async def create_pdf(
         cols = 1
         rows = 1
         if layout == 2:
-            if orientation == "landscape":
+            if arrangement == "horizontal":
                 cols, rows = 2, 1
-            else:
+            elif arrangement == "vertical":
                 cols, rows = 1, 2
+            else:  # auto
+                if orientation == "landscape":
+                    cols, rows = 2, 1
+                else:
+                    cols, rows = 1, 2
         elif layout == 4:
-            cols, rows = 2, 2
+            if arrangement == "horizontal":
+                cols, rows = 4, 1
+            elif arrangement == "vertical":
+                cols, rows = 1, 4
+            else:  # grid or auto
+                cols, rows = 2, 2
 
         if orientation == "portrait":
             page_w, page_h = 2480, 3508

@@ -50,6 +50,13 @@
             <option value="portrait" data-i18n="portrait">Portrait</option>
             <option value="landscape" data-i18n="landscape">Landscape</option>
         </select>
+        <label for="arrangeSelect" data-i18n="arrangement">Layout:</label>
+        <select id="arrangeSelect">
+            <option value="auto" data-i18n="auto">Auto</option>
+            <option value="horizontal" data-i18n="horizontal">Horizontal</option>
+            <option value="vertical" data-i18n="vertical">Vertical</option>
+            <option value="grid" data-i18n="grid">Grid</option>
+        </select>
         <label for="scaleMode" data-i18n="scaleLabel">Image size:</label>
         <select id="scaleMode">
             <option value="fit" data-i18n="fill">Fill cell</option>
@@ -58,6 +65,7 @@
         </select>
         <input type="number" id="scalePercent" value="100" min="10" max="300" step="10" style="width:60px; display:none;">
     </div>
+    <div id="layoutPreview" style="display:none;"></div>
 
     <h2 data-i18n="processedImages">Processed Images:</h2>
     <div id="processedGallery"></div>

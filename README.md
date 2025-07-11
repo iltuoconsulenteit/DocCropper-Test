@@ -19,7 +19,8 @@ The frontend allows the user to:
 - Submit data (image, coordinates, size) to the backend
 - Export all processed images to PDF
 - Choose how many processed images appear on each PDF page
-- Select portrait or landscape orientation for the PDF. With two images per page, landscape places them side by side while portrait stacks them vertically
+- Select portrait or landscape orientation for the PDF
+- Choose whether images are arranged horizontally, vertically or in a grid and preview the layout before exporting
 - Control how images are scaled on each page: fill the cell, keep original size or apply a custom percentage.
   When using **Original** or **100%** the generator now adjusts for the image's
   DPI so photos scanned at 150–200 DPI render closer to real size on a 300 DPI
@@ -33,7 +34,7 @@ All JavaScript is contained in `static/app.js`.
 - `points`: coordinates of the 4 corners (TL, TR, BR, BL)
 - `image_file`: the uploaded file
 
-After all images are processed, choose how many images appear on each page, how they are scaled and whether the PDF is in portrait or landscape orientation, then use the **Export PDF** button to download it.
+After all images are processed, choose how many images appear on each page, how they are scaled, the page orientation and the image arrangement. A small preview updates to reflect your choices before you use **Export PDF** to download.
 The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. Place your own images inside `static/logos/` and reference them from `static/index.html`.
 The expected filenames are `header_logo.png` for the top banner and `footer_logo.png` for the footer. If these files are missing, the placeholders will be used automatically.
 Default preferences for language, PDF layout, page orientation and scaling are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.

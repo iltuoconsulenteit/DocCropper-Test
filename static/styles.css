@@ -158,6 +158,19 @@ button:hover {
     margin-left: 5px;
 }
 
+#layoutPreview {
+    width: 200px;
+    height: 250px;
+    border: 1px dashed #666;
+    margin-bottom: 10px;
+    display: none;
+}
+
+#layoutPreview .cell {
+    border: 1px solid #aaa;
+    background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px);
+}
+
 .modal {
     display: none;
     position: fixed;
