@@ -87,3 +87,15 @@ button:hover {
     border: 1px solid #ddd;
     background-color: #fff;
 }
+
+#processedGallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#processedGallery img {
+    max-width: 150px;
+    border: 1px solid #ddd;
+    background: #fff;
+}

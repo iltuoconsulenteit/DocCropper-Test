@@ -16,6 +16,7 @@ const imageUploadElement = document.getElementById('imageUpload');
 const submitBtn = document.getElementById('submitBtn');
 const exportPdfBtn = document.getElementById('exportPdfBtn');
 const processedImageElement = document.getElementById('processedImage');
+const processedGallery = document.getElementById('processedGallery');
 const statusMessageElement = document.getElementById('statusMessage');
 
 let files = [];
@@ -202,6 +203,7 @@ imageUploadElement.addEventListener('change', (event) => {
     files = Array.from(event.target.files);
     currentFileIndex = 0;
     processedImages = [];
+    processedGallery.innerHTML = '';
     exportPdfBtn.style.display = 'none';
     if (files.length > 0) {
         const reader = new FileReader();
@@ -284,6 +286,9 @@ submitBtn.addEventListener('click', () => {
             processedImages.push(data.processed_image);
             processedImageElement.src = data.processed_image;
             processedImageElement.style.display = 'block';
+            const thumb = document.createElement('img');
+            thumb.src = data.processed_image;
+            processedGallery.appendChild(thumb);
             currentFileIndex++;
             if (currentFileIndex < files.length) {
                 statusMessageElement.textContent = 'Image processed. Load next...';
