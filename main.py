@@ -258,12 +258,18 @@ async def create_pdf(
                 draw = ImageDraw.Draw(page)
                 font = ImageFont.load_default()
                 text = "DEMO"
-                if hasattr(draw, "textbbox"):
+                try:
                     bbox = draw.textbbox((0, 0), text, font=font)
                     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                else:
+                except AttributeError:
+                    # Fallback for Pillow < 8.0
                     tw, th = draw.textsize(text, font=font)
-                draw.text(((page_w - tw) / 2, (page_h - th) / 2), text, fill=(255,0,0), font=font)
+                draw.text(
+                    ((page_w - tw) / 2, (page_h - th) / 2),
+                    text,
+                    fill=(255, 0, 0),
+                    font=font,
+                )
             pages.append(page)
 
         pdf_bytes_io = io.BytesIO()
