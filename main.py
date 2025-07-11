@@ -258,7 +258,11 @@ async def create_pdf(
                 draw = ImageDraw.Draw(page)
                 font = ImageFont.load_default()
                 text = "DEMO"
-                tw, th = draw.textsize(text, font=font)
+                if hasattr(draw, "textbbox"):
+                    bbox = draw.textbbox((0, 0), text, font=font)
+                    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+                else:
+                    tw, th = draw.textsize(text, font=font)
                 draw.text(((page_w - tw) / 2, (page_h - th) / 2), text, fill=(255,0,0), font=font)
             pages.append(page)
 
