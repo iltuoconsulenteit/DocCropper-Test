@@ -2,15 +2,16 @@
 <html>
 <head>
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
-    <title>Document Perspective Corrector</title>
+    <title>DocCropper</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>Document Perspective Corrector</h1>
+    <img id="headerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="DocCropper logo">
+    <h1>DocCropper</h1>
 
     <div>
-        <label for="imageUpload">Upload Document Image:</label>
-        <input type="file" id="imageUpload" accept="image/*">
+        <label for="imageUpload">Upload Document Image(s):</label>
+        <input type="file" id="imageUpload" accept="image/*" multiple>
     </div>
 
     <div id="wrapper">
@@ -27,10 +28,17 @@
     </div>
 
     <button id="submitBtn">Process Image</button>
+    <button id="exportPdfBtn" style="display:none;">Export PDF</button>
 
-    <h2>Processed Image:</h2>
+    <h2>Processed Images:</h2>
+    <div id="processedGallery"></div>
     <img id="processedImage" src="#" alt="Processed Document" style="display:none; max-width: 100%;">
     <p id="statusMessage"></p>
+
+    <footer>
+        <p>Realizzato da IlTuoConsulenteIT</p>
+        <img id="footerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="IlTuoConsulenteIT logo">
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="module" src="/static/app.js"></script>
