@@ -9,10 +9,17 @@
     <header id="pageHeader">
         <img id="headerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="DocCropper logo">
         <h1>DocCropper</h1>
+        <div id="languageChoice">
+            <label for="langSelect" data-i18n="language">Language:</label>
+            <select id="langSelect">
+                <option value="en" data-i18n="english">English</option>
+                <option value="it" data-i18n="italian">Italiano</option>
+            </select>
+        </div>
     </header>
 
     <div>
-        <label for="imageUpload">Upload Document Image(s):</label>
+        <label for="imageUpload" data-i18n="uploadLabel">Upload Document Image(s):</label>
         <input type="file" id="imageUpload" accept="image/*" multiple>
     </div>
 
@@ -29,23 +36,23 @@
         </svg>
     </div>
 
-    <button id="submitBtn">Process Image</button>
-    <button id="exportPdfBtn" style="display:none;">Export PDF</button>
+    <button id="submitBtn" data-i18n="processImage">Process Image</button>
+    <button id="exportPdfBtn" style="display:none;" data-i18n="exportPdf">Export PDF</button>
     <div id="layoutControls" style="display:none;">
-        <label for="layoutSelect">Images per page:</label>
+        <label for="layoutSelect" data-i18n="imagesPerPage">Images per page:</label>
         <select id="layoutSelect">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="4">4</option>
         </select>
-        <label for="orientationSelect">Orientation:</label>
+        <label for="orientationSelect" data-i18n="orientation">Orientation:</label>
         <select id="orientationSelect">
-            <option value="portrait">Portrait</option>
-            <option value="landscape">Landscape</option>
+            <option value="portrait" data-i18n="portrait">Portrait</option>
+            <option value="landscape" data-i18n="landscape">Landscape</option>
         </select>
     </div>
 
-    <h2>Processed Images:</h2>
+    <h2 data-i18n="processedImages">Processed Images:</h2>
     <div id="processedGallery"></div>
     <img id="processedImage" src="#" alt="Processed Document" style="display:none; max-width: 100%;">
     <div id="imageModal" class="modal" style="display:none;">
@@ -55,7 +62,7 @@
     <p id="statusMessage"></p>
 
     <footer id="pageFooter">
-        <span>Realizzato da IlTuoConsulenteIT</span>
+        <span data-i18n="realizzato">Realizzato da IlTuoConsulenteIT</span>
         <img id="footerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII=" alt="IlTuoConsulenteIT logo">
     </footer>
 

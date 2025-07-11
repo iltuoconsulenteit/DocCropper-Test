@@ -20,6 +20,7 @@ The frontend allows the user to:
 - Export all processed images to PDF
 - Choose how many processed images appear on each PDF page
 - Select portrait or landscape orientation for the PDF. With two images per page, landscape places them side by side while portrait stacks them vertically
+- Change the interface language (Italian translation included)
 
 All JavaScript is contained in `static/app.js`.
 
@@ -29,7 +30,8 @@ All JavaScript is contained in `static/app.js`.
 - `image_file`: the uploaded file
 
 After all images are processed, choose how many images appear on each page and whether the PDF is in portrait or landscape orientation, then use the **Export PDF** button to download it.
-The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. A convenient place for custom logos is `static/logos/` (create it if missing) and reference the files from `static/index.html`.
+The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. Place your own images inside `static/logos/` and reference them from `static/index.html`.
+Language JSON files live in `static/lang/`. Add additional translations by creating new `<code>lang.json</code>` files and updating the language selector.
 Processed images appear as thumbnails. Each thumbnail offers **Rotate**, **Edit**, and **Delete** buttons so you can refine the results. Click a thumbnail itself to view it in a modal overlay.
 
 ---

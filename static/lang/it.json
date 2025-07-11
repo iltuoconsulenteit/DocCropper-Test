@@ -1,0 +1,17 @@
+{
+  "uploadLabel": "Carica immagini documento:",
+  "processImage": "Elabora immagine",
+  "exportPdf": "Esporta PDF",
+  "imagesPerPage": "Immagini per pagina:",
+  "orientation": "Orientamento:",
+  "portrait": "Verticale",
+  "landscape": "Orizzontale",
+  "processedImages": "Immagini elaborate:",
+  "rotate": "Ruota",
+  "edit": "Modifica",
+  "delete": "Elimina",
+  "realizzato": "Realizzato da IlTuoConsulenteIT",
+  "language": "Lingua:",
+  "english": "Inglese",
+  "italian": "Italiano"
+}

@@ -24,12 +24,57 @@ const statusMessageElement = document.getElementById('statusMessage');
 const imageModal = document.getElementById('imageModal');
 const modalImage = document.getElementById('modalImage');
 const closeModal = document.getElementById('closeModal');
+const langSelect = document.getElementById('langSelect');
 
 let files = [];
 let currentFileIndex = 0;
 let processedImages = [];
 let processedFiles = [];
 let editingIndex = null;
+
+let translations = {};
+let currentLang = 'en';
+
+async function loadTranslations(lang) {
+    try {
+        const resp = await fetch(`/static/lang/${lang}.json`);
+        translations = await resp.json();
+    } catch (e) {
+        translations = {};
+    }
+}
+
+function t(key) {
+    return translations[key] || key;
+}
+
+function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (translations[k]) {
+            el.textContent = translations[k];
+        }
+    });
+    // also update dynamic option labels
+    orientationSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    langSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    processedGallery.querySelectorAll('.thumbButtons button').forEach(btn => {
+        const key = btn.dataset.key;
+        if (translations[key]) {
+            btn.textContent = translations[key];
+        }
+    });
+}
 
 function openModal(src) {
     modalImage.src = src;
@@ -96,7 +141,8 @@ function addThumbnail(src, index) {
     btns.className = 'thumbButtons';
 
     const rotateBtn = document.createElement('button');
-    rotateBtn.textContent = 'Rotate';
+    rotateBtn.dataset.key = 'rotate';
+    rotateBtn.textContent = t('rotate');
     rotateBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const idx = Array.from(processedGallery.children).indexOf(container);
@@ -105,7 +151,8 @@ function addThumbnail(src, index) {
     btns.appendChild(rotateBtn);
 
     const editBtn = document.createElement('button');
-    editBtn.textContent = 'Edit';
+    editBtn.dataset.key = 'edit';
+    editBtn.textContent = t('edit');
     editBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const idx = Array.from(processedGallery.children).indexOf(container);
@@ -114,7 +161,8 @@ function addThumbnail(src, index) {
     btns.appendChild(editBtn);
 
     const delBtn = document.createElement('button');
-    delBtn.textContent = 'Delete';
+    delBtn.dataset.key = 'delete';
+    delBtn.textContent = t('delete');
     delBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const idx = Array.from(processedGallery.children).indexOf(container);
@@ -475,6 +523,15 @@ exportPdfBtn.addEventListener('click', () => {
         statusMessageElement.textContent = `Error: ${error.message}`;
     });
 });
+
+langSelect.addEventListener('change', async () => {
+    currentLang = langSelect.value;
+    await loadTranslations(currentLang);
+    applyTranslations();
+});
+
+// initial load
+loadTranslations(currentLang).then(applyTranslations);
 
 if (window.safari) {
     history.pushState(null, null, location.href);
