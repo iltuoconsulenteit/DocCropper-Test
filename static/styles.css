@@ -153,6 +153,11 @@ button:hover {
     margin-bottom: 10px;
 }
 
+#scalePercent {
+    width: 60px;
+    margin-left: 5px;
+}
+
 .modal {
     display: none;
     position: fixed;

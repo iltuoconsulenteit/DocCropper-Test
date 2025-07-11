@@ -18,6 +18,8 @@ const exportPdfBtn = document.getElementById('exportPdfBtn');
 const layoutControls = document.getElementById('layoutControls');
 const layoutSelect = document.getElementById('layoutSelect');
 const orientationSelect = document.getElementById('orientationSelect');
+const scaleMode = document.getElementById('scaleMode');
+const scalePercent = document.getElementById('scalePercent');
 const processedImageElement = document.getElementById('processedImage');
 const processedGallery = document.getElementById('processedGallery');
 const statusMessageElement = document.getElementById('statusMessage');
@@ -77,6 +79,12 @@ function applyTranslations() {
     });
     // also update dynamic option labels
     orientationSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    scaleMode.querySelectorAll('option').forEach(opt => {
         const k = opt.getAttribute('data-i18n');
         if (translations[k]) {
             opt.textContent = translations[k];
@@ -516,10 +524,12 @@ exportPdfBtn.addEventListener('click', () => {
     statusMessageElement.textContent = 'Generating PDF...';
     const layout = parseInt(layoutSelect.value || '1');
     const orientation = orientationSelect.value || 'portrait';
+    const scale_mode = scaleMode.value || 'fit';
+    const scale_percent = parseInt(scalePercent.value || '100');
     fetch('/create-pdf/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: processedImages, layout, orientation })
+        body: JSON.stringify({ images: processedImages, layout, orientation, scale_mode, scale_percent })
     })
     .then(response => {
         if (!response.ok) {
@@ -559,6 +569,15 @@ orientationSelect.addEventListener('change', () => {
     saveSettings({ orientation: orientationSelect.value });
 });
 
+scaleMode.addEventListener('change', () => {
+    scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
+    saveSettings({ scale_mode: scaleMode.value, scale_percent: parseInt(scalePercent.value || '100') });
+});
+
+scalePercent.addEventListener('change', () => {
+    saveSettings({ scale_percent: parseInt(scalePercent.value || '100') });
+});
+
 // initial load of settings and translations
 loadSettings().then(async (cfg) => {
     if (cfg.language) {
@@ -570,6 +589,13 @@ loadSettings().then(async (cfg) => {
     }
     if (cfg.orientation) {
         orientationSelect.value = cfg.orientation;
+    }
+    if (cfg.scale_mode) {
+        scaleMode.value = cfg.scale_mode;
+        scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
+    }
+    if (cfg.scale_percent !== undefined) {
+        scalePercent.value = cfg.scale_percent;
     }
     await loadTranslations(currentLang);
     applyTranslations();

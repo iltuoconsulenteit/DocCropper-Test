@@ -17,7 +17,7 @@ SETTINGS_FILE = "settings.json"
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
-        data = {"language": "en", "layout": 1, "orientation": "portrait", "license_key": ""}
+        data = {"language": "en", "layout": 1, "orientation": "portrait", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
         with open(SETTINGS_FILE, "w") as fh:
             json.dump(data, fh)
         return data
@@ -25,7 +25,7 @@ def load_settings():
         with open(SETTINGS_FILE) as fh:
             return json.load(fh)
     except Exception:
-        return {"language": "en", "layout": 1, "orientation": "portrait", "license_key": ""}
+        return {"language": "en", "layout": 1, "orientation": "portrait", "scale_mode": "fit", "scale_percent": 100, "license_key": ""}
 
 def save_settings(update: dict):
     data = load_settings()
@@ -200,7 +200,9 @@ async def process_image(
 async def create_pdf(
     images: list[str] = Body(...),
     layout: int = Body(1),
-    orientation: str = Body("portrait")
+    orientation: str = Body("portrait"),
+    scale_mode: str = Body("fit"),
+    scale_percent: int = Body(100)
 ):
     try:
         settings = load_settings()
@@ -239,6 +241,9 @@ async def create_pdf(
         else:
             page_w, page_h = 3508, 2480
 
+        scale_mode = scale_mode.lower()
+        if scale_mode not in ("fit", "original", "percent"):
+            scale_mode = "fit"
         cell_w = page_w // cols
         cell_h = page_h // rows
 
@@ -249,11 +254,21 @@ async def create_pdf(
                 col = j % cols
                 row = j // cols
                 temp = img.copy()
-                # scale image to fill the cell, allowing upscale
-                ratio = min(cell_w / temp.width, cell_h / temp.height)
+                if scale_mode == "percent":
+                    ratio = max(0.01, scale_percent / 100.0)
+                elif scale_mode == "fit":
+                    ratio = min(cell_w / temp.width, cell_h / temp.height)
+                else:  # original
+                    ratio = 1.0
+
                 new_w = max(1, int(temp.width * ratio))
                 new_h = max(1, int(temp.height * ratio))
                 temp = temp.resize((new_w, new_h), Image.LANCZOS)
+                if new_w > cell_w or new_h > cell_h:
+                    left = max(0, (new_w - cell_w) // 2)
+                    top = max(0, (new_h - cell_h) // 2)
+                    temp = temp.crop((left, top, left + min(cell_w, new_w), top + min(cell_h, new_h)))
+                    new_w, new_h = temp.size
                 offset_x = col * cell_w + (cell_w - new_w) // 2
                 offset_y = row * cell_h + (cell_h - new_h) // 2
                 page.paste(temp, (offset_x, offset_y))
