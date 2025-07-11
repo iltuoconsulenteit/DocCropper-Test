@@ -167,7 +167,8 @@ async def process_image(
 @app.post("/create-pdf/")
 async def create_pdf(
     images: list[str] = Body(...),
-    layout: int = Body(1)
+    layout: int = Body(1),
+    orientation: str = Body("portrait")
 ):
     try:
         pil_images = []
@@ -185,6 +186,10 @@ async def create_pdf(
         if layout not in (1, 2, 4):
             layout = 1
 
+        orientation = orientation.lower()
+        if orientation not in ("portrait", "landscape"):
+            orientation = "portrait"
+
         cols = 1
         rows = 1
         if layout == 2:
@@ -192,14 +197,17 @@ async def create_pdf(
         elif layout == 4:
             cols, rows = 2, 2
 
-        A4_WIDTH = 2480
-        A4_HEIGHT = 3508
-        cell_w = A4_WIDTH // cols
-        cell_h = A4_HEIGHT // rows
+        if orientation == "portrait":
+            page_w, page_h = 2480, 3508
+        else:
+            page_w, page_h = 3508, 2480
+
+        cell_w = page_w // cols
+        cell_h = page_h // rows
 
         pages = []
         for i in range(0, len(pil_images), layout):
-            page = Image.new("RGB", (A4_WIDTH, A4_HEIGHT), "white")
+            page = Image.new("RGB", (page_w, page_h), "white")
             for j, img in enumerate(pil_images[i:i+layout]):
                 col = j % cols
                 row = j // cols

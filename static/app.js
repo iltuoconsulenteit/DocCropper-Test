@@ -17,6 +17,7 @@ const submitBtn = document.getElementById('submitBtn');
 const exportPdfBtn = document.getElementById('exportPdfBtn');
 const layoutControls = document.getElementById('layoutControls');
 const layoutSelect = document.getElementById('layoutSelect');
+const orientationSelect = document.getElementById('orientationSelect');
 const processedImageElement = document.getElementById('processedImage');
 const processedGallery = document.getElementById('processedGallery');
 const statusMessageElement = document.getElementById('statusMessage');
@@ -327,10 +328,11 @@ exportPdfBtn.addEventListener('click', () => {
     }
     statusMessageElement.textContent = 'Generating PDF...';
     const layout = parseInt(layoutSelect.value || '1');
+    const orientation = orientationSelect.value || 'portrait';
     fetch('/create-pdf/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: processedImages, layout })
+        body: JSON.stringify({ images: processedImages, layout, orientation })
     })
     .then(response => {
         if (!response.ok) {

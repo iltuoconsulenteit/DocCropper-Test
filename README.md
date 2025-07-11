@@ -19,6 +19,7 @@ The frontend allows the user to:
 - Submit data (image, coordinates, size) to the backend
 - Export all processed images to PDF
 - Choose how many processed images appear on each PDF page
+- Select portrait or landscape orientation for the PDF
 
 All JavaScript is contained in `static/app.js`.
 
@@ -27,8 +28,8 @@ All JavaScript is contained in `static/app.js`.
 - `points`: coordinates of the 4 corners (TL, TR, BR, BL)
 - `image_file`: the uploaded file
 
-After all images are processed, choose a layout (number of images per page) and use the **Export PDF** button to download the compiled PDF.
-The interface includes placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding if desired.
+After all images are processed, choose how many images appear on each page and whether the PDF is in portrait or landscape orientation, then use the **Export PDF** button to download it.
+The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. A convenient place for custom logos is `static/logos/` (create it if missing) and reference the files from `static/index.html`.
 
 ---
 
@@ -41,6 +42,7 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Applies optional sharpening filter
 - Saves or returns the corrected image
 - Compiles all processed images into a single **PDF**, arranging up to four per page
+- Supports portrait or landscape page orientation
 
 ---
 
