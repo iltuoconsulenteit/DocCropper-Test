@@ -14,8 +14,13 @@ const fogPathElement = document.getElementById('fogPath');
 // console.log('DEBUG: fogPathElement right after declaration:', fogPathElement); 
 const imageUploadElement = document.getElementById('imageUpload');
 const submitBtn = document.getElementById('submitBtn');
+const exportPdfBtn = document.getElementById('exportPdfBtn');
 const processedImageElement = document.getElementById('processedImage');
 const statusMessageElement = document.getElementById('statusMessage');
+
+let files = [];
+let currentFileIndex = 0;
+let processedImages = [];
 
 const draggableElements = {
     p1: document.getElementById('p1'),
@@ -194,13 +199,16 @@ function setupImage(imageUrl) {
 
 
 imageUploadElement.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
+    files = Array.from(event.target.files);
+    currentFileIndex = 0;
+    processedImages = [];
+    exportPdfBtn.style.display = 'none';
+    if (files.length > 0) {
         const reader = new FileReader();
         reader.onload = (e) => {
             setupImage(e.target.result);
-        }
-        reader.readAsDataURL(file);
+        };
+        reader.readAsDataURL(files[0]);
     }
 });
 
@@ -254,8 +262,9 @@ submitBtn.addEventListener('click', () => {
     // console.log(`origW (natural): ${origW}, origH (natural): ${origH}`);
     // console.log("pointsForBackend (scaled to original image):", JSON.stringify(pointsForBackend));
 
+    const currentFile = files[currentFileIndex];
     const formData = new FormData();
-    formData.append('image_file', imageUploadElement.files[0]);
+    formData.append('image_file', currentFile);
     formData.append('points', JSON.stringify(pointsForBackend));
     formData.append('original_width', Math.round(origW));
     formData.append('original_height', Math.round(origH));
@@ -271,17 +280,63 @@ submitBtn.addEventListener('click', () => {
         return response.json();
     })
     .then(data => {
-        // console.log('Response from backend:', data);
         if (data.processed_image) {
+            processedImages.push(data.processed_image);
             processedImageElement.src = data.processed_image;
             processedImageElement.style.display = 'block';
-            statusMessageElement.textContent = 'Image processed successfully!';
+            currentFileIndex++;
+            if (currentFileIndex < files.length) {
+                statusMessageElement.textContent = 'Image processed. Load next...';
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setupImage(e.target.result);
+                };
+                reader.readAsDataURL(files[currentFileIndex]);
+            } else {
+                statusMessageElement.textContent = 'All images processed.';
+                wrapperElement.style.display = 'none';
+                exportPdfBtn.style.display = 'inline-block';
+            }
         } else {
             statusMessageElement.textContent = data.message || 'Failed to process image.';
         }
     })
     .catch(error => {
         console.error('Error submitting for processing:', error);
+        statusMessageElement.textContent = `Error: ${error.message}`;
+    });
+});
+
+exportPdfBtn.addEventListener('click', () => {
+    if (processedImages.length === 0) {
+        statusMessageElement.textContent = 'No processed images to export.';
+        return;
+    }
+    statusMessageElement.textContent = 'Generating PDF...';
+    fetch('/create-pdf/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: processedImages })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.detail || err.message || `HTTP error! status: ${response.status}`) });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.pdf) {
+            const link = document.createElement('a');
+            link.href = data.pdf;
+            link.download = 'documents.pdf';
+            link.click();
+            statusMessageElement.textContent = 'PDF generated.';
+        } else {
+            statusMessageElement.textContent = data.message || 'Failed to create PDF.';
+        }
+    })
+    .catch(error => {
+        console.error('Error creating PDF:', error);
         statusMessageElement.textContent = `Error: ${error.message}`;
     });
 });

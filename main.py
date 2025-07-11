@@ -7,7 +7,8 @@ import math
 import cv2
 import numpy as np
 import uvicorn
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, Body
+from PIL import Image
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -161,6 +162,30 @@ async def process_image(
     except Exception as e:
         logger.exception("An error occurred during image processing.")
         return JSONResponse(status_code=500, content={"message": f"An internal error occurred: {str(e)}"})
+
+
+@app.post("/create-pdf/")
+async def create_pdf(images: list[str] = Body(...)):
+    try:
+        pil_images = []
+        for img_b64 in images:
+            if img_b64.startswith('data:'):
+                img_b64 = img_b64.split(',', 1)[1]
+            img_bytes = base64.b64decode(img_b64)
+            pil_img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+            pil_images.append(pil_img)
+
+        if not pil_images:
+            return JSONResponse(status_code=400, content={"message": "No images provided"})
+
+        pdf_bytes_io = io.BytesIO()
+        pil_images[0].save(pdf_bytes_io, format="PDF", save_all=True, append_images=pil_images[1:])
+        pdf_bytes = pdf_bytes_io.getvalue()
+        pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        return JSONResponse(content={"pdf": "data:application/pdf;base64," + pdf_base64})
+    except Exception as e:
+        logger.exception("Failed to create PDF")
+        return JSONResponse(status_code=500, content={"message": f"Could not create PDF: {str(e)}"})
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
