@@ -50,6 +50,9 @@ function rotateImage(index) {
         processedImages[index] = rotatedData;
         const container = processedGallery.children[index];
         container.querySelector('img').src = rotatedData;
+        if (imageModal.style.display === 'block') {
+            openModal(rotatedData);
+        }
     };
     img.src = processedImages[index];
 }
@@ -83,7 +86,10 @@ function addThumbnail(src, index) {
 
     const imgEl = document.createElement('img');
     imgEl.src = src;
-    imgEl.addEventListener('click', () => openModal(src));
+    imgEl.addEventListener('click', () => {
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        openModal(processedImages[idx]);
+    });
     container.appendChild(imgEl);
 
     const btns = document.createElement('div');
@@ -93,7 +99,8 @@ function addThumbnail(src, index) {
     rotateBtn.textContent = 'Rotate';
     rotateBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        rotateImage(index);
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        rotateImage(idx);
     });
     btns.appendChild(rotateBtn);
 
@@ -101,7 +108,8 @@ function addThumbnail(src, index) {
     editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        editImage(index);
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        editImage(idx);
     });
     btns.appendChild(editBtn);
 
@@ -109,7 +117,8 @@ function addThumbnail(src, index) {
     delBtn.textContent = 'Delete';
     delBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        deleteImage(index);
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        deleteImage(idx);
     });
     btns.appendChild(delBtn);
 
@@ -325,7 +334,8 @@ interact('.draggable').draggable({
     modifiers: [
         interact.modifiers.restrictRect({
             restriction: 'parent',
-            endOnly: false
+            endOnly: false,
+            elementRect: { left: 0.5, top: 0.5, right: 0.5, bottom: 0.5 }
         })
     ],
     listeners: {
