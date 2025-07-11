@@ -644,21 +644,14 @@ scalePercent.addEventListener('change', () => {
 });
 
 function applyProStatus() {
+    // In demo mode features remain usable but PDF pages beyond the first
+    // will include a DEMO watermark. We simply update the button style
+    // to reflect the license status without disabling functionality.
     if (!isLicensed) {
-        exportPdfBtn.classList.add('pro-disabled');
-        layoutSelect.disabled = true;
-        orientationSelect.disabled = true;
-        arrangeSelect.disabled = true;
-        scaleMode.disabled = true;
-        scalePercent.disabled = true;
-        imageUploadElement.multiple = false;
+        exportPdfBtn.classList.remove('pro-disabled');
+        imageUploadElement.multiple = true;
     } else {
         exportPdfBtn.classList.remove('pro-disabled');
-        layoutSelect.disabled = false;
-        orientationSelect.disabled = false;
-        arrangeSelect.disabled = false;
-        scaleMode.disabled = false;
-        scalePercent.disabled = false;
         imageUploadElement.multiple = true;
     }
 }

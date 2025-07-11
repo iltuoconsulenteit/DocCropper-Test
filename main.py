@@ -268,6 +268,7 @@ async def create_pdf(
         pages = []
         TARGET_DPI = 300
         for i in range(0, len(pil_images), layout):
+            page_index = i // layout
             page = Image.new("RGB", (page_w, page_h), "white")
             for j, img in enumerate(pil_images[i:i+layout]):
                 col = j % cols
@@ -294,7 +295,7 @@ async def create_pdf(
                 offset_x = col * cell_w + margin + (inner_w - new_w) // 2
                 offset_y = row * cell_h + margin + (inner_h - new_h) // 2
                 page.paste(temp, (offset_x, offset_y))
-            if not licensed:
+            if not licensed and page_index > 0:
                 from PIL import ImageDraw, ImageFont
                 draw = ImageDraw.Draw(page)
                 text = "DEMO"
