@@ -42,19 +42,29 @@ if not exist "%SETTINGS_FILE%" (
 
 set /p LIC_KEY=Enter license key (leave blank for demo):
 if not "%LIC_KEY%"=="" (
-  set /p LIC_NAME=Licensed to:
-  set "SF=%SETTINGS_FILE%"
-  set "KY=%LIC_KEY%"
-  set "NM=%LIC_NAME%"
-  >"%TEMP%\updlic.py" echo import json, os
-  >>"%TEMP%\updlic.py" echo f=os.environ['SF']
-  >>"%TEMP%\updlic.py" echo data=json.load(open(f))
-  >>"%TEMP%\updlic.py" echo data['license_key']=os.environ['KY']
-  >>"%TEMP%\updlic.py" echo data['license_name']=os.environ['NM']
-  >>"%TEMP%\updlic.py" echo json.dump(data,open(f,'w'))
-  python "%TEMP%\updlic.py"
-  del "%TEMP%\updlic.py"
-  echo License saved
+  >"%TEMP%\checklic.py" echo import os,sys
+  >>"%TEMP%\checklic.py" echo key=sys.argv[1].strip().upper()
+  >>"%TEMP%\checklic.py" echo dev=os.environ.get('DOCROPPER_DEV_LICENSE','ILTUOCONSULENTEIT-DEV').upper()
+  >>"%TEMP%\checklic.py" echo print('OK' if key in ('VALID',dev) else 'NO')
+  for /f %%r in ('python "%TEMP%\checklic.py" "%LIC_KEY%"') do set VALID=%%r
+  del "%TEMP%\checklic.py"
+  if /I "%VALID%"=="OK" (
+    set /p LIC_NAME=Licensed to:
+    set "SF=%SETTINGS_FILE%"
+    set "KY=%LIC_KEY%"
+    set "NM=%LIC_NAME%"
+    >"%TEMP%\updlic.py" echo import json, os
+    >>"%TEMP%\updlic.py" echo f=os.environ['SF']
+    >>"%TEMP%\updlic.py" echo data=json.load(open(f))
+    >>"%TEMP%\updlic.py" echo data['license_key']=os.environ['KY']
+    >>"%TEMP%\updlic.py" echo data['license_name']=os.environ['NM']
+    >>"%TEMP%\updlic.py" echo json.dump(data,open(f,'w'))
+    python "%TEMP%\updlic.py"
+    del "%TEMP%\updlic.py"
+    echo License saved
+  ) else (
+    echo License key invalid. Continuing in demo mode.
+  )
 ) else (
   echo Demo mode enabled
 )

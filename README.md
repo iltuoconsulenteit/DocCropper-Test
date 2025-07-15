@@ -81,7 +81,7 @@ You could use other server-side languages or tools for this processing (e.g. Ima
 
 Run `install/install_DocCropper.sh` on Linux or macOS (or double-click `install/install_DocCropper.command` on macOS) and `install/install_DocCropper.bat` on Windows from the folder where you want the project. If the script lives inside an existing clone under `install/` it updates that copy; otherwise it creates a new `DocCropper` subfolder next to the script. Both versions verify that `git`, `python3`/`python` and `pip3`/`pip` are available before pulling the latest changes with `--rebase --autostash`.
 
-After cloning or updating, the installer optionally asks for a license key. Leaving it blank keeps the application in demo mode. When a key and licensee name are supplied they are stored in `settings.json` so the interface shows "Licensed to &lt;name&gt;".
+After cloning or updating, the installer optionally asks for a license key. Leaving it blank keeps the application in demo mode. If the key does not match a valid commercial or developer key the installer warns that it is invalid and continues in demo mode. Valid keys together with the licensee name are stored in `settings.json` so the interface shows "Licensed to &lt;name&gt;".
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" based on these settings.

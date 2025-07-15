@@ -55,8 +55,12 @@ fi
 
 read -r -p "🔑 Enter license key (leave blank for demo): " LIC_KEY
 if [ -n "$LIC_KEY" ]; then
-  read -r -p "👤 Licensed to: " LIC_NAME
-  python3 - "$SETTINGS_FILE" "$LIC_KEY" "$LIC_NAME" <<'PY'
+  UPPER_KEY="$(echo "$LIC_KEY" | tr '[:lower:]' '[:upper:]')"
+  DEV_KEY="${DOCROPPER_DEV_LICENSE:-ILTUOCONSULENTEIT-DEV}"
+  DEV_KEY_UPPER="$(echo "$DEV_KEY" | tr '[:lower:]' '[:upper:]')"
+  if [ "$UPPER_KEY" = "VALID" ] || [ "$UPPER_KEY" = "$DEV_KEY_UPPER" ]; then
+    read -r -p "👤 Licensed to: " LIC_NAME
+    python3 - "$SETTINGS_FILE" "$LIC_KEY" "$LIC_NAME" <<'PY'
 import json, sys
 f, key, name = sys.argv[1:]
 with open(f) as fh:
@@ -66,7 +70,10 @@ data['license_name'] = name
 with open(f, 'w') as fh:
     json.dump(data, fh)
 PY
-  echo "✅ License saved"
+    echo "✅ License saved"
+  else
+    echo "❌ License key invalid. Continuing in demo mode."
+  fi
 else
   echo "ℹ️  Demo mode enabled"
 fi
