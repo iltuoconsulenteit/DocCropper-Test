@@ -14,6 +14,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 SETTINGS_FILE = "settings.json"
+# Developer license key for demonstration
+DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV")
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -207,7 +209,8 @@ async def create_pdf(
 ):
     try:
         settings = load_settings()
-        licensed = settings.get("license_key") == "VALID"
+        key = settings.get("license_key", "")
+        licensed = key in ("VALID", DEV_LICENSE_KEY)
         pil_images = []
         for img_b64 in images:
             if img_b64.startswith('data:'):

@@ -33,6 +33,7 @@ const licenseInfo = document.getElementById('licenseInfo');
 
 let isLicensed = false;
 let licenseName = '';
+const DEV_KEY = 'ILTUOCONSULENTEIT-DEV';
 
 let files = [];
 let currentFileIndex = 0;
@@ -679,10 +680,12 @@ loadSettings().then(async (cfg) => {
         scalePercent.value = cfg.scale_percent;
     }
     if (cfg.license_key) {
-        isLicensed = cfg.license_key === 'VALID';
+        isLicensed = cfg.license_key === 'VALID' || cfg.license_key === DEV_KEY;
     }
     if (cfg.license_name) {
         licenseName = cfg.license_name;
+    } else if (cfg.license_key === DEV_KEY) {
+        licenseName = 'Developer';
     }
     await loadTranslations(currentLang);
     applyTranslations();
