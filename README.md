@@ -39,7 +39,7 @@ After all images are processed, choose how many images appear on each page, how 
 The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. Place your own images inside `static/logos/` and reference them from `static/index.html`.
 The expected filenames are `header_logo.png` for the top banner and `footer_logo.png` for the footer. If these files are missing, the placeholders will be used automatically.
 Default preferences for language, PDF layout, page orientation and scaling are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.
-Without una licenza valida i PDF esportati mostrano un grande watermark "DEMO" da pagina due in poi. Per prove e dimostrazioni puoi inserire la chiave `ILTUOCONSULENTEIT-DEV` in `settings.json` o indicarla tramite la variabile `DOCROPPER_DEV_LICENSE`.
+Senza una licenza valida i PDF esportati mostrano un grande watermark "DEMO" da pagina due in poi. Per test e dimostrazioni si può usare una chiave di sviluppo da inserire in `settings.json` o indicare tramite la variabile `DOCROPPER_DEV_LICENSE`.
 Language JSON files live in `static/lang/`. Add additional translations by creating new `<code>lang.json</code>` files and updating the language selector.
 Processed images appear as thumbnails. Each thumbnail offers **Rotate**, **Edit**, and **Delete** buttons so you can refine the results. Click a thumbnail itself to view it in a modal overlay.
 
@@ -85,7 +85,7 @@ The application reads configuration from `settings.json` in the project root. Yo
 
 ## 🔓 Licenza e versione commerciale
 
-**DocCropper** è distribuito con licenza [MIT](LICENSE.txt). Senza una chiave valida il programma rimane in modalità **DEMO**. È comunque possibile caricare più immagini ed esportare in PDF: dalla seconda pagina in poi comparirà un vistoso watermark "DEMO".
+**DocCropper** è distribuito con licenza [MIT](LICENSE.txt). Senza una chiave valida il programma resta in modalità **DEMO**. I PDF esportati con la versione dimostrativa mantengono un grande watermark "DEMO" a partire dalla seconda pagina, pur consentendo il caricamento di più immagini.
 
 ### 💼 Funzionalità PRO
 
@@ -99,7 +99,7 @@ L'acquisto della licenza PRO fornisce un file `license.key` e l'indicazione del 
 
 ### 🔑 Chiave di sviluppo
 
-Per dimostrazioni e test puoi usare la chiave `ILTUOCONSULENTEIT-DEV` inserendola nel campo `license_key` di `settings.json`. L'applicazione si comporterà come registrata e le funzionalità PRO saranno disponibili. Puoi personalizzare questa chiave tramite la variabile d'ambiente `DOCROPPER_DEV_LICENSE`.
+Per dimostrazioni e test è possibile abilitare temporaneamente tutte le funzioni PRO inserendo la chiave di sviluppo nel campo `license_key` di `settings.json` oppure impostando la variabile d'ambiente `DOCROPPER_DEV_LICENSE`. Il valore di questa chiave è fornito separatamente e non viene riportato qui per motivi di sicurezza.
 
 Per informazioni commerciali: **doccropper@iltuoconsulenteit.it**.
 
