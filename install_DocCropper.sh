@@ -2,7 +2,14 @@
 set -e
 
 REPO_URL="https://github.com/iltuoconsulenteit/DocCropper"
-TARGET_DIR="$HOME/Scrivania/DocCropper"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# If the script lives inside an existing clone we update that
+# otherwise we clone into a DocCropper subfolder next to the script
+if [ -d "$SCRIPT_DIR/.git" ]; then
+  TARGET_DIR="$SCRIPT_DIR"
+else
+  TARGET_DIR="$SCRIPT_DIR/DocCropper"
+fi
 
 printf '\xF0\x9F\x94\xA7 Verifica pacchetti richiesti...\n'
 for cmd in git python3 pip3; do
@@ -20,7 +27,7 @@ if [ -d "$TARGET_DIR/.git" ]; then
     git -C "$TARGET_DIR" pull --rebase
   fi
 else
-  echo "📥 Clonazione repository..."
+  echo "📥 Clonazione repository in $TARGET_DIR..."
   git clone "$REPO_URL" "$TARGET_DIR"
 fi
 
