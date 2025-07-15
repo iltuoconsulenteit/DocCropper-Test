@@ -79,7 +79,7 @@ You could use other server-side languages or tools for this processing (e.g. Ima
 
 ### 🛠 Install script
 
-Run `./install_DocCropper.sh` to clone or update the project in `~/Scrivania/DocCropper`. The script checks for `git`, `python3`, and `pip3` before pulling the latest changes with `--rebase`.
+Run `./install_DocCropper.sh` on Linux/macOS or `install_DocCropper.bat` on Windows to clone or update the project in the desktop `DocCropper` folder. Both scripts check for `git`, `python3`/`python` and `pip3`/`pip` before pulling the latest changes with `--rebase`.
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 
@@ -101,5 +101,5 @@ L'acquisto della licenza PRO fornisce un file `license.key` e l'indicazione del 
 
 Per dimostrazioni e test puoi usare la chiave `ILTUOCONSULENTEIT-DEV` inserendola nel campo `license_key` di `settings.json`. L'applicazione si comporterà come registrata e le funzionalità PRO saranno disponibili. Puoi personalizzare questa chiave tramite la variabile d'ambiente `DOCROPPER_DEV_LICENSE`.
 
-Per informazioni commerciali: **DocCropper@iltuoconsulenteit.it**.
+Per informazioni commerciali: **doccropper@iltuoconsulenteit.it**.
 
