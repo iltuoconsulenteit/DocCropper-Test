@@ -35,3 +35,37 @@ else
 fi
 
 printf '\xE2\x9C\x85 Operazione completata.\n'
+
+SETTINGS_FILE="$TARGET_DIR/settings.json"
+if [ ! -f "$SETTINGS_FILE" ]; then
+  cat > "$SETTINGS_FILE" <<'EOF'
+{
+  "language": "en",
+  "layout": 1,
+  "orientation": "portrait",
+  "arrangement": "auto",
+  "scale_mode": "fit",
+  "scale_percent": 100,
+  "license_key": "",
+  "license_name": ""
+}
+EOF
+fi
+
+read -r -p "🔑 Enter license key (leave blank for demo): " LIC_KEY
+if [ -n "$LIC_KEY" ]; then
+  read -r -p "👤 Licensed to: " LIC_NAME
+  python3 - "$SETTINGS_FILE" "$LIC_KEY" "$LIC_NAME" <<'PY'
+import json, sys
+f, key, name = sys.argv[1:]
+with open(f) as fh:
+    data = json.load(fh)
+data['license_key'] = key
+data['license_name'] = name
+with open(f, 'w') as fh:
+    json.dump(data, fh)
+PY
+  echo "✅ License saved"
+else
+  echo "ℹ️  Demo mode enabled"
+fi

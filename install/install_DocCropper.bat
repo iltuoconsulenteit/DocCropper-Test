@@ -35,5 +35,28 @@ if exist "%TARGET_DIR%\.git" (
 )
 
 echo Done.
+set SETTINGS_FILE=%TARGET_DIR%\settings.json
+if not exist "%SETTINGS_FILE%" (
+  echo { "language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": "", "license_name": "" } > "%SETTINGS_FILE%"
+)
+
+set /p LIC_KEY=Enter license key (leave blank for demo):
+if not "%LIC_KEY%"=="" (
+  set /p LIC_NAME=Licensed to:
+  set "SF=%SETTINGS_FILE%"
+  set "KY=%LIC_KEY%"
+  set "NM=%LIC_NAME%"
+  >"%TEMP%\updlic.py" echo import json, os
+  >>"%TEMP%\updlic.py" echo f=os.environ['SF']
+  >>"%TEMP%\updlic.py" echo data=json.load(open(f))
+  >>"%TEMP%\updlic.py" echo data['license_key']=os.environ['KY']
+  >>"%TEMP%\updlic.py" echo data['license_name']=os.environ['NM']
+  >>"%TEMP%\updlic.py" echo json.dump(data,open(f,'w'))
+  python "%TEMP%\updlic.py"
+  del "%TEMP%\updlic.py"
+  echo License saved
+) else (
+  echo Demo mode enabled
+)
 endlocal
 
