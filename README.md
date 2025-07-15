@@ -79,7 +79,7 @@ You could use other server-side languages or tools for this processing (e.g. Ima
 
 ### 🛠 Install script
 
-Run `install/install_DocCropper.sh` on Linux/macOS or `install/install_DocCropper.bat` on Windows from the folder where you want the project. If the script lives inside an existing clone under `install/` it updates that copy; otherwise it creates a new `DocCropper` subfolder next to the script. Both versions verify that `git`, `python3`/`python` and `pip3`/`pip` are available before pulling the latest changes with `--rebase --autostash`.
+Run `install/install_DocCropper.sh` on Linux or macOS (or double-click `install/install_DocCropper.command` on macOS) and `install/install_DocCropper.bat` on Windows from the folder where you want the project. If the script lives inside an existing clone under `install/` it updates that copy; otherwise it creates a new `DocCropper` subfolder next to the script. Both versions verify that `git`, `python3`/`python` and `pip3`/`pip` are available before pulling the latest changes with `--rebase --autostash`.
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 
