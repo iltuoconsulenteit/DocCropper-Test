@@ -5,6 +5,7 @@
   "arrangement": "auto",
   "scale_mode": "fit",
   "scale_percent": 100,
+  "port": 8000,
   "license_key": "",
   "license_name": ""
 }

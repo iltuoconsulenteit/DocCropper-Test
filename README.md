@@ -38,7 +38,7 @@ All JavaScript is contained in `static/app.js`.
 After all images are processed, choose how many images appear on each page, how they are scaled, the page orientation and the image arrangement. A small preview updates to reflect your choices before you use **Export PDF** to download.
 The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. Place your own images inside `static/logos/` and reference them from `static/index.html`.
 The expected filenames are `header_logo.png` for the top banner and `footer_logo.png` for the footer. If these files are missing, the placeholders will be used automatically.
-Default preferences for language, PDF layout, page orientation and scaling are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.
+Default preferences for language, PDF layout, page orientation, scaling and the HTTP server port are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.  Edit the `port` value if you want DocCropper to listen on a different port.
 Without a valid license the exported PDF shows a large "DEMO" watermark from the second page onward. For testing or demonstrations you may use a developer key placed in `settings.json` or provided via the `DOCROPPER_DEV_LICENSE` environment variable.
 Language JSON files live in `static/lang/`. Add additional translations by creating new `<code>lang.json</code>` files and updating the language selector.
 Processed images appear as thumbnails. Each thumbnail offers **Rotate**, **Edit**, and **Delete** buttons so you can refine the results. Click a thumbnail itself to view it in a modal overlay.
@@ -79,12 +79,16 @@ You could use other server-side languages or tools for this processing (e.g. Ima
 
 ### 🛠 Install script
 
-Run `install/install_DocCropper.sh` on Linux or macOS (or double-click `install/install_DocCropper.command` on macOS) and `install/install_DocCropper.bat` on Windows from the folder where you want the project. If the script lives inside an existing clone under `install/` it updates that copy; otherwise it creates a new `DocCropper` subfolder next to the script. Both versions verify that `git`, `python3`/`python` and `pip3`/`pip` are available before pulling the latest changes with `--rebase --autostash`.
+Run `install/install_DocCropper.sh` on Linux or macOS (or double‑click `install/install_DocCropper.command` on macOS) and `install/install_DocCropper.bat` on Windows from the folder where you want the project. If the script lives inside an existing clone under `install/` it updates that copy; otherwise it creates a new `DocCropper` subfolder next to the script. Both versions verify that `git`, `python3`/`python` and `pip3`/`pip` are available before pulling the latest changes with `--rebase --autostash`. At the end the script can start the application automatically using the configured port.
 
-After cloning or updating, the installer optionally asks for a license key. Leaving it blank keeps the application in demo mode. If the key does not match a valid commercial or developer key the installer warns that it is invalid and continues in demo mode. Valid keys together with the licensee name are stored in `settings.json` so the interface shows "Licensed to &lt;name&gt;".
+After cloning or updating, the installer optionally asks for a license key. Leaving it blank keeps the application in demo mode. If the key does not match a valid commercial or developer key the installer warns that it is invalid and continues in demo mode. Valid keys together with the licensee name are stored in `settings.json` so the interface shows "Licensed to &lt;name&gt;". After the setup completes it can launch the application through the companion `start_DocCropper` script for your platform.
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" based on these settings.
+
+### ▶️ Running DocCropper
+
+Use `install/start_DocCropper.sh` on Linux, `install/start_DocCropper.command` on macOS or `install/start_DocCropper.bat` on Windows to run the server later. The script creates a virtual environment when needed, installs requirements and launches the app on the port defined in `settings.json`.
 
 ## 🔓 Licensing and commercial version
 

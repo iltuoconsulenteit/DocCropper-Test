@@ -2,6 +2,7 @@
 set -e
 
 REPO_URL="https://github.com/iltuoconsulenteit/DocCropper"
+BRANCH="main"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 # If the script sits inside the repo's install/ folder we update the parent
@@ -27,11 +28,11 @@ if [ -d "$TARGET_DIR/.git" ]; then
   read -r -p "🔄 Vuoi aggiornare il repository da GitHub? [s/N] " ans
   if [[ "$ans" =~ ^[sS]$ ]]; then
     echo "📥 Aggiornamento repository..."
-    git -C "$TARGET_DIR" pull --rebase --autostash
+    git -C "$TARGET_DIR" pull --rebase --autostash origin "$BRANCH"
   fi
 else
   echo "📥 Clonazione repository in $TARGET_DIR..."
-  git clone "$REPO_URL" "$TARGET_DIR"
+  git clone --branch "$BRANCH" "$REPO_URL" "$TARGET_DIR"
 fi
 
 printf '\xE2\x9C\x85 Operazione completata.\n'
@@ -46,6 +47,7 @@ if [ ! -f "$SETTINGS_FILE" ]; then
   "arrangement": "auto",
   "scale_mode": "fit",
   "scale_percent": 100,
+  "port": 8000,
   "license_key": "",
   "license_name": ""
 }
@@ -75,4 +77,9 @@ PY
   fi
 else
   echo "ℹ️  Demo mode enabled"
+fi
+
+read -r -p "🚀 Launch DocCropper now? [Y/n] " RUN_APP
+if [[ ! "$RUN_APP" =~ ^[Nn]$ ]]; then
+  "$SCRIPT_DIR/start_DocCropper.command"
 fi

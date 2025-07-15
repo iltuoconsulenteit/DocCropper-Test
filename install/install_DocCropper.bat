@@ -1,6 +1,7 @@
 @echo off
 setlocal
 set REPO_URL=https://github.com/iltuoconsulenteit/DocCropper
+set BRANCH=main
 set SCRIPT_DIR=%~dp0
 set PARENT_DIR=%~dp0..\
 rem If the script sits inside the repo's install folder we update the parent
@@ -27,17 +28,17 @@ if exist "%TARGET_DIR%\.git" (
   set /p UPD=Update the repository from GitHub? [s/N]
   if /I "%UPD%"=="s" (
     echo Updating repository...
-    git -C "%TARGET_DIR%" pull --rebase --autostash
+    git -C "%TARGET_DIR%" pull --rebase --autostash origin %BRANCH%
   )
 ) else (
   echo Cloning repository in %TARGET_DIR%...
-  git clone "%REPO_URL%" "%TARGET_DIR%"
+  git clone --branch %BRANCH% "%REPO_URL%" "%TARGET_DIR%"
 )
 
 echo Done.
 set SETTINGS_FILE=%TARGET_DIR%\settings.json
 if not exist "%SETTINGS_FILE%" (
-  echo { "language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "license_key": "", "license_name": "" } > "%SETTINGS_FILE%"
+  echo { "language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "" } > "%SETTINGS_FILE%"
 )
 
 set /p LIC_KEY=Enter license key (leave blank for demo):
@@ -67,6 +68,10 @@ if not "%LIC_KEY%"=="" (
   )
 ) else (
   echo Demo mode enabled
+)
+set /p RUN_APP=Launch DocCropper now? [Y/n]
+if /I "%RUN_APP%" NEQ "n" if /I "%RUN_APP%" NEQ "N" (
+  call "%SCRIPT_DIR%start_DocCropper.bat"
 )
 endlocal
 
