@@ -3,10 +3,13 @@ set -e
 
 REPO_URL="https://github.com/iltuoconsulenteit/DocCropper"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# If the script lives inside an existing clone we update that
+PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+# If the script sits inside the repo's install/ folder we update the parent
 # otherwise we clone into a DocCropper subfolder next to the script
 if [ -d "$SCRIPT_DIR/.git" ]; then
   TARGET_DIR="$SCRIPT_DIR"
+elif [ -d "$PARENT_DIR/.git" ]; then
+  TARGET_DIR="$PARENT_DIR"
 else
   TARGET_DIR="$SCRIPT_DIR/DocCropper"
 fi
@@ -24,7 +27,7 @@ if [ -d "$TARGET_DIR/.git" ]; then
   read -r -p "🔄 Vuoi aggiornare il repository da GitHub? [s/N] " ans
   if [[ "$ans" =~ ^[sS]$ ]]; then
     echo "📥 Aggiornamento repository..."
-    git -C "$TARGET_DIR" pull --rebase
+    git -C "$TARGET_DIR" pull --rebase --autostash
   fi
 else
   echo "📥 Clonazione repository in $TARGET_DIR..."

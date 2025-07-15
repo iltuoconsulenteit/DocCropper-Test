@@ -2,10 +2,13 @@
 setlocal
 set REPO_URL=https://github.com/iltuoconsulenteit/DocCropper
 set SCRIPT_DIR=%~dp0
-rem If the script sits inside a clone we update that, otherwise we create a
-rem DocCropper folder alongside the script
+set PARENT_DIR=%~dp0..\
+rem If the script sits inside the repo's install folder we update the parent
+rem otherwise we create a DocCropper folder alongside the script
 if exist "%SCRIPT_DIR%\.git" (
   set TARGET_DIR=%SCRIPT_DIR%
+) else if exist "%PARENT_DIR%\.git" (
+  set TARGET_DIR=%PARENT_DIR%
 ) else (
   set TARGET_DIR=%SCRIPT_DIR%DocCropper
 )
@@ -24,7 +27,7 @@ if exist "%TARGET_DIR%\.git" (
   set /p UPD=Update the repository from GitHub? [s/N]
   if /I "%UPD%"=="s" (
     echo Updating repository...
-    git -C "%TARGET_DIR%" pull --rebase
+    git -C "%TARGET_DIR%" pull --rebase --autostash
   )
 ) else (
   echo Cloning repository in %TARGET_DIR%...
