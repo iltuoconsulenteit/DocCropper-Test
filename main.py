@@ -4,6 +4,7 @@ import logging
 import json
 import math
 import os
+import subprocess
 
 import cv2
 import numpy as np
@@ -16,6 +17,18 @@ from fastapi.staticfiles import StaticFiles
 SETTINGS_FILE = "settings.json"
 # Developer license key for demonstration
 DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV")
+
+def get_last_commit_date() -> str:
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--date=short", "--pretty=%ad"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip().replace("-", "")
+    except Exception:
+        return ""
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -79,6 +92,16 @@ async def google_login(token: str = Body(...)):
     except Exception as e:
         logger.exception("Google token verification failed")
         return JSONResponse(status_code=400, content={"message": "Invalid token"})
+
+
+@app.post("/verify-dev-password/")
+async def verify_dev_password(password: str = Body(...)):
+    settings = load_settings()
+    if settings.get("license_key") != DEV_LICENSE_KEY:
+        return JSONResponse(status_code=400, content={"message": "Developer key not set"})
+    if password == get_last_commit_date():
+        return {"ok": True}
+    return JSONResponse(status_code=403, content={"message": "Invalid"})
 
 
 @app.post("/process-image/")
@@ -221,12 +244,16 @@ async def create_pdf(
     orientation: str = Body("portrait"),
     arrangement: str = Body("auto"),
     scale_mode: str = Body("fit"),
-    scale_percent: int = Body(100)
+    scale_percent: int = Body(100),
+    dev_password: str | None = Body(None)
 ):
     try:
         settings = load_settings()
         key = settings.get("license_key", "")
-        licensed = key in ("VALID", DEV_LICENSE_KEY)
+        if key == DEV_LICENSE_KEY:
+            licensed = dev_password == get_last_commit_date()
+        else:
+            licensed = bool(key)
         pil_images = []
         for img_b64 in images:
             if img_b64.startswith('data:'):

@@ -39,9 +39,9 @@ After all images are processed, choose how many images appear on each page, how 
 The interface includes small placeholder logos encoded directly in the HTML. Replace these `data:` URIs with your own branding. Place your own images inside `static/logos/` and reference them from `static/index.html`.
 The expected filenames are `header_logo.png` for the top banner and `footer_logo.png` for the footer. If these files are missing, the placeholders will be used automatically.
 Default preferences for language, PDF layout, page orientation, scaling and the HTTP server port are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.  Edit the `port` value if you want DocCropper to listen on a different port.
-You can also configure a small payment box through `settings.json` by setting `payment_mode` to `donation` or `subscription`. Provide your PayPal or Stripe link (and optional bank transfer details) using the `paypal_link`, `stripe_link` and `bank_info` fields. When enabled, the interface shows a box with those payment options so users can donate or subscribe.
-If you supply a `google_client_id` in `settings.json`, DocCropper displays a Google sign‑in button. This uses Google's identity service so users can sign in with their Google account. After signing in, the app can associate the logged in user with a donation or subscription plan.
-Without a valid license the exported PDF shows a large "DEMO" watermark from the second page onward. For testing or demonstrations you may use a developer key placed in `settings.json` or provided via the `DOCROPPER_DEV_LICENSE` environment variable.
+You can also configure a small payment box through `settings.json` by setting `payment_mode` to `donation` or `subscription`. Provide your PayPal or Stripe link (and optional bank transfer details) using the `paypal_link`, `stripe_link` and `bank_info` fields. When enabled, the interface shows a box with those payment options so users can donate or subscribe. These boxes are visible even in demo or developer mode as long as the links are provided.
+If you supply a `google_client_id` in `settings.json`, DocCropper displays a Google sign‑in button. This uses Google's identity service so users can sign in with their Google account. After signing in, the app can associate the logged in user with a donation or subscription plan. The login box is also visible regardless of licensing.
+Without a valid license the exported PDF shows a large "DEMO" watermark from the second page onward. For testing or demonstrations you may use a developer key placed in `settings.json` or provided via the `DOCROPPER_DEV_LICENSE` environment variable. When using this key you must also enter the developer password (the latest commit date in `YYYYMMDD` format) to enable full functionality.
 Language JSON files live in `static/lang/`. Add additional translations by creating new `<code>lang.json</code>` files and updating the language selector.
 Processed images appear as thumbnails. Each thumbnail offers **Rotate**, **Edit**, and **Delete** buttons so you can refine the results. Click a thumbnail itself to view it in a modal overlay.
 
@@ -108,7 +108,7 @@ Purchasing a PRO license provides a `license.key` file and the registered licens
 
 ### 🔑 Developer key
 
-For demonstrations and testing you can temporarily unlock all PRO features by placing the developer key in the `license_key` field of `settings.json` or by setting the `DOCROPPER_DEV_LICENSE` environment variable. The actual key is provided separately and is not shown here for security reasons.
+For demonstrations and testing you may use a developer key. Place this key in the `license_key` field of `settings.json` (or set it through the `DOCROPPER_DEV_LICENSE` environment variable). When DocCropper detects the developer key it asks for a password before enabling PRO features. The password is the date of the latest commit in `YYYYMMDD` format. After entering the correct password the interface shows `Licensed to Developer` and behaves like the full version.
 
 For commercial inquiries: **doccropper@iltuoconsulenteit.it**.
 
