@@ -14,7 +14,7 @@
 This project uses [Interact.JS](https://github.com/taye/interact.js) for managing draggable corner points.
 
 The frontend allows the user to:
-- Upload one or more images
+- Upload one or more images (on mobile devices the file picker can use the camera directly)
 - Manually adjust the four corners of each image
 - Submit data (image, coordinates, size) to the backend
 - Export all processed images to PDF
@@ -24,9 +24,10 @@ The frontend allows the user to:
 - Control how images are scaled on each page: fill the cell, keep original size or apply a custom percentage.
   When using **Original** or **100%** the generator now adjusts for the image's
   DPI so photos scanned at 150–200 DPI render closer to real size on a 300 DPI
-  PDF page.
+-  PDF page.
 - A small margin is applied around each image so nothing touches the page edges
 - Change the interface language (Italian translation included)
+- The layout is responsive so DocCropper works well on smartphones and tablets
 
 All JavaScript is contained in `static/app.js`.
 

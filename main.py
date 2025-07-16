@@ -87,9 +87,9 @@ async def google_login(token: str = Body(...)):
 @app.post("/verify-dev-password/")
 async def verify_dev_password(password: str = Body(...)):
     settings = load_settings()
-    if settings.get("license_key", "").upper() != DEV_LICENSE_KEY_UPPER:
+    if settings.get("license_key", "").strip().upper() != DEV_LICENSE_KEY_UPPER:
         return JSONResponse(status_code=400, content={"message": "Developer key not set"})
-    if password == DEV_PASSWORD:
+    if password.strip() == DEV_PASSWORD:
         return {"ok": True}
     return JSONResponse(status_code=403, content={"message": "Invalid"})
 
