@@ -30,6 +30,7 @@
   "payPaypal": "Pay with PayPal",
   "payStripe": "Pay with Stripe",
   "bankInfo": "Bank transfer information",
+  "noPaymentInfo": "No payment details provided",
   "signIn": "Sign in",
   "signOut": "Sign out",
   "loggedInAs": "Logged in as",

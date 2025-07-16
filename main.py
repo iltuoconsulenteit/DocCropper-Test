@@ -15,8 +15,9 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 SETTINGS_FILE = "settings.json"
-# Developer license key for demonstration
+# Developer license key for demonstration (case-insensitive)
 DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV")
+DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
 
 def get_last_commit_date() -> str:
     try:
@@ -97,7 +98,7 @@ async def google_login(token: str = Body(...)):
 @app.post("/verify-dev-password/")
 async def verify_dev_password(password: str = Body(...)):
     settings = load_settings()
-    if settings.get("license_key") != DEV_LICENSE_KEY:
+    if settings.get("license_key", "").upper() != DEV_LICENSE_KEY_UPPER:
         return JSONResponse(status_code=400, content={"message": "Developer key not set"})
     if password == get_last_commit_date():
         return {"ok": True}
@@ -249,8 +250,8 @@ async def create_pdf(
 ):
     try:
         settings = load_settings()
-        key = settings.get("license_key", "")
-        if key == DEV_LICENSE_KEY:
+        key = settings.get("license_key", "").upper()
+        if key == DEV_LICENSE_KEY_UPPER:
             licensed = dev_password == get_last_commit_date()
         else:
             licensed = bool(key)

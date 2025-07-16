@@ -30,6 +30,7 @@
   "payPaypal": "Paga con PayPal",
   "payStripe": "Paga con Stripe",
   "bankInfo": "Informazioni per bonifico",
+  "noPaymentInfo": "Nessun dettaglio di pagamento",
   "signIn": "Accedi",
   "signOut": "Esci",
   "loggedInAs": "Connesso come",

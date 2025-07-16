@@ -38,6 +38,7 @@ let devPassword = '';
 let isLicensed = false;
 let licenseName = '';
 const DEV_KEY = 'ILTUOCONSULENTEIT-DEV';
+const DEV_KEY_UPPER = DEV_KEY.toUpperCase();
 let userInfo = null;
 
 let files = [];
@@ -669,26 +670,39 @@ function applyProStatus() {
 }
 
 function renderPaymentBox(cfg) {
-    if (!cfg || cfg.payment_mode === 'none' || !cfg.payment_mode) {
+    if (!cfg || !cfg.payment_mode) {
+        paymentBox.style.display = 'none';
+        return;
+    }
+    const mode = cfg.payment_mode.toLowerCase();
+    if (mode === 'none') {
         paymentBox.style.display = 'none';
         return;
     }
     paymentBox.style.display = 'block';
     let html = `<h3>${t('support')}</h3><ul>`;
-    if (cfg.payment_mode === 'donation') {
+    let hasItem = false;
+    if (mode === 'donation') {
         if (cfg.paypal_link) {
             html += `<li><a href="${cfg.paypal_link}" target="_blank">${t('donatePaypal')}</a></li>`;
+            hasItem = true;
         }
-    } else if (cfg.payment_mode === 'subscription') {
+    } else if (mode === 'subscription') {
         if (cfg.paypal_link) {
             html += `<li><a href="${cfg.paypal_link}" target="_blank">${t('payPaypal')}</a></li>`;
+            hasItem = true;
         }
         if (cfg.stripe_link) {
             html += `<li><a href="${cfg.stripe_link}" target="_blank">${t('payStripe')}</a></li>`;
+            hasItem = true;
         }
         if (cfg.bank_info) {
             html += `<li>${t('bankInfo')}: ${cfg.bank_info}</li>`;
+            hasItem = true;
         }
+    }
+    if (!hasItem) {
+        html += `<li>${t('noPaymentInfo')}</li>`;
     }
     html += '</ul>';
     paymentBox.innerHTML = html;
@@ -759,19 +773,19 @@ loadSettings().then(async (cfg) => {
     if (cfg.scale_percent !== undefined) {
         scalePercent.value = cfg.scale_percent;
     }
-    if (cfg.license_key && cfg.license_key !== DEV_KEY) {
+    if (cfg.license_key && cfg.license_key.toUpperCase() !== DEV_KEY_UPPER) {
         isLicensed = true;
     }
     if (cfg.license_name) {
         licenseName = cfg.license_name;
-    } else if (cfg.license_key === DEV_KEY) {
+    } else if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER) {
         licenseName = 'Developer';
     }
     await loadTranslations(currentLang);
     applyTranslations();
     renderPaymentBox(cfg);
     renderLogin(cfg);
-    if (cfg.license_key === DEV_KEY && !devUnlocked) {
+    if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER && !devUnlocked) {
         licenseInfo.innerHTML = `<input type="password" id="devPass" placeholder="${t('enterDevPassword')}"> <button id="devUnlock">${t('unlock')}</button>`;
         document.getElementById('devUnlock').addEventListener('click', async () => {
             const val = document.getElementById('devPass').value.trim();
