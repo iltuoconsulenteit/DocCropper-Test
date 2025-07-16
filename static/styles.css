@@ -33,6 +33,15 @@ h1, h2 {
     border-radius: 4px;
 }
 
+#loginArea {
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+}
+#loginArea button {
+    margin-left: 5px;
+}
+
 #pageFooter {
     text-align: center;
     margin-top: 20px;

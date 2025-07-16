@@ -29,5 +29,9 @@
   "donatePaypal": "Dona con PayPal",
   "payPaypal": "Paga con PayPal",
   "payStripe": "Paga con Stripe",
-  "bankInfo": "Informazioni per bonifico"
+  "bankInfo": "Informazioni per bonifico",
+  "signIn": "Accedi",
+  "signOut": "Esci",
+  "loggedInAs": "Connesso come",
+  "signInFailed": "Accesso fallito"
 }

@@ -19,7 +19,7 @@ DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
-        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "none", "paypal_link": "", "stripe_link": "", "bank_info": ""}
+        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "none", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
         with open(SETTINGS_FILE, "w") as fh:
             json.dump(data, fh)
         return data
@@ -27,7 +27,7 @@ def load_settings():
         with open(SETTINGS_FILE) as fh:
             return json.load(fh)
     except Exception:
-        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "none", "paypal_link": "", "stripe_link": "", "bank_info": ""}
+        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "none", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
 
 def save_settings(update: dict):
     data = load_settings()
@@ -63,6 +63,22 @@ async def get_settings():
 @app.post("/settings/")
 async def update_settings(settings: dict = Body(...)):
     return save_settings(settings)
+
+
+@app.post("/google-login/")
+async def google_login(token: str = Body(...)):
+    settings = load_settings()
+    client_id = settings.get("google_client_id", "")
+    if not client_id:
+        return JSONResponse(status_code=400, content={"message": "Google login not configured"})
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests
+        info = id_token.verify_oauth2_token(token, requests.Request(), client_id)
+        return {"email": info.get("email"), "name": info.get("name")}
+    except Exception as e:
+        logger.exception("Google token verification failed")
+        return JSONResponse(status_code=400, content={"message": "Invalid token"})
 
 
 @app.post("/process-image/")

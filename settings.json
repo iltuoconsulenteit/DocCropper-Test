@@ -11,5 +11,6 @@
   "payment_mode": "none",
   "paypal_link": "",
   "stripe_link": "",
-  "bank_info": ""
+  "bank_info": "",
+  "google_client_id": ""
 }

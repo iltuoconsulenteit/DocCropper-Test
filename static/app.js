@@ -31,10 +31,12 @@ const langSelect = document.getElementById('langSelect');
 const layoutPreview = document.getElementById('layoutPreview');
 const licenseInfo = document.getElementById('licenseInfo');
 const paymentBox = document.getElementById('paymentBox');
+const loginArea = document.getElementById('loginArea');
 
 let isLicensed = false;
 let licenseName = '';
 const DEV_KEY = 'ILTUOCONSULENTEIT-DEV';
+let userInfo = null;
 
 let files = [];
 let currentFileIndex = 0;
@@ -686,6 +688,48 @@ function renderPaymentBox(cfg) {
     paymentBox.innerHTML = html;
 }
 
+function renderLogin(cfg) {
+    if (!cfg || !cfg.google_client_id) {
+        loginArea.style.display = 'none';
+        return;
+    }
+    loginArea.style.display = 'block';
+    function init() {
+        google.accounts.id.initialize({
+            client_id: cfg.google_client_id,
+            callback: async (response) => {
+                const res = await fetch('/google-login/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: response.credential})
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    userInfo = data;
+                    loginArea.innerHTML = `${t('loggedInAs')} ${data.name || data.email} <button id="signOutBtn">${t('signOut')}</button>`;
+                    document.getElementById('signOutBtn').addEventListener('click', () => {
+                        google.accounts.id.disableAutoSelect();
+                        userInfo = null;
+                        loginArea.innerHTML = '';
+                        renderLogin(cfg);
+                    });
+                } else {
+                    loginArea.textContent = t('signInFailed');
+                }
+            }
+        });
+        google.accounts.id.renderButton(loginArea, {theme: 'outline', size: 'medium'});
+    }
+    if (typeof google === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.onload = init;
+        document.head.appendChild(script);
+    } else {
+        init();
+    }
+}
+
 // initial load of settings and translations
 loadSettings().then(async (cfg) => {
     currentSettings = cfg;
@@ -720,6 +764,7 @@ loadSettings().then(async (cfg) => {
     await loadTranslations(currentLang);
     applyTranslations();
     renderPaymentBox(cfg);
+    renderLogin(cfg);
     licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
     applyProStatus();
     updateLayoutPreview();

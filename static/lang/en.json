@@ -29,5 +29,9 @@
   "donatePaypal": "Donate with PayPal",
   "payPaypal": "Pay with PayPal",
   "payStripe": "Pay with Stripe",
-  "bankInfo": "Bank transfer information"
+  "bankInfo": "Bank transfer information",
+  "signIn": "Sign in",
+  "signOut": "Sign out",
+  "loggedInAs": "Logged in as",
+  "signInFailed": "Login failed"
 }
