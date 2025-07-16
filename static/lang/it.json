@@ -24,5 +24,10 @@
   "english": "Inglese",
   "italian": "Italiano",
   "demoVersion": "DEMO - funzionalit\u00e0 PRO disabilitate",
-  "licensedTo": "Licenziato a"
+  "licensedTo": "Licenziato a",
+  "support": "Supporto",
+  "donatePaypal": "Dona con PayPal",
+  "payPaypal": "Paga con PayPal",
+  "payStripe": "Paga con Stripe",
+  "bankInfo": "Informazioni per bonifico"
 }

@@ -30,6 +30,7 @@ const closeModal = document.getElementById('closeModal');
 const langSelect = document.getElementById('langSelect');
 const layoutPreview = document.getElementById('layoutPreview');
 const licenseInfo = document.getElementById('licenseInfo');
+const paymentBox = document.getElementById('paymentBox');
 
 let isLicensed = false;
 let licenseName = '';
@@ -43,6 +44,7 @@ let editingIndex = null;
 
 let translations = {};
 let currentLang = 'en';
+let currentSettings = {};
 
 async function loadSettings() {
     try {
@@ -617,6 +619,7 @@ langSelect.addEventListener('change', async () => {
     currentLang = langSelect.value;
     await loadTranslations(currentLang);
     applyTranslations();
+    renderPaymentBox(currentSettings);
     saveSettings({ language: currentLang });
 });
 
@@ -657,8 +660,35 @@ function applyProStatus() {
     }
 }
 
+function renderPaymentBox(cfg) {
+    if (!cfg || cfg.payment_mode === 'none' || !cfg.payment_mode) {
+        paymentBox.style.display = 'none';
+        return;
+    }
+    paymentBox.style.display = 'block';
+    let html = `<h3>${t('support')}</h3><ul>`;
+    if (cfg.payment_mode === 'donation') {
+        if (cfg.paypal_link) {
+            html += `<li><a href="${cfg.paypal_link}" target="_blank">${t('donatePaypal')}</a></li>`;
+        }
+    } else if (cfg.payment_mode === 'subscription') {
+        if (cfg.paypal_link) {
+            html += `<li><a href="${cfg.paypal_link}" target="_blank">${t('payPaypal')}</a></li>`;
+        }
+        if (cfg.stripe_link) {
+            html += `<li><a href="${cfg.stripe_link}" target="_blank">${t('payStripe')}</a></li>`;
+        }
+        if (cfg.bank_info) {
+            html += `<li>${t('bankInfo')}: ${cfg.bank_info}</li>`;
+        }
+    }
+    html += '</ul>';
+    paymentBox.innerHTML = html;
+}
+
 // initial load of settings and translations
 loadSettings().then(async (cfg) => {
+    currentSettings = cfg;
     if (cfg.language) {
         currentLang = cfg.language;
         langSelect.value = cfg.language;
@@ -689,6 +719,7 @@ loadSettings().then(async (cfg) => {
     }
     await loadTranslations(currentLang);
     applyTranslations();
+    renderPaymentBox(cfg);
     licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
     applyProStatus();
     updateLayoutPreview();

@@ -24,5 +24,10 @@
   "english": "English",
   "italian": "Italiano",
   "demoVersion": "DEMO - PRO features disabled",
-  "licensedTo": "Licensed to"
+  "licensedTo": "Licensed to",
+  "support": "Support",
+  "donatePaypal": "Donate with PayPal",
+  "payPaypal": "Pay with PayPal",
+  "payStripe": "Pay with Stripe",
+  "bankInfo": "Bank transfer information"
 }
