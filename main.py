@@ -4,7 +4,6 @@ import logging
 import json
 import math
 import os
-import subprocess
 
 import cv2
 import numpy as np
@@ -18,18 +17,8 @@ SETTINGS_FILE = "settings.json"
 # Developer license key for demonstration (case-insensitive)
 DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV")
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
-
-def get_last_commit_date() -> str:
-    try:
-        result = subprocess.run(
-            ["git", "log", "-1", "--date=short", "--pretty=%ad"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return result.stdout.strip().replace("-", "")
-    except Exception:
-        return ""
+# Password required when using the developer key
+DEV_PASSWORD = os.environ.get("DOCROPPER_DEV_PASSWORD", "Messina2025!")
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -100,7 +89,7 @@ async def verify_dev_password(password: str = Body(...)):
     settings = load_settings()
     if settings.get("license_key", "").upper() != DEV_LICENSE_KEY_UPPER:
         return JSONResponse(status_code=400, content={"message": "Developer key not set"})
-    if password == get_last_commit_date():
+    if password == DEV_PASSWORD:
         return {"ok": True}
     return JSONResponse(status_code=403, content={"message": "Invalid"})
 
@@ -252,7 +241,7 @@ async def create_pdf(
         settings = load_settings()
         key = settings.get("license_key", "").upper()
         if key == DEV_LICENSE_KEY_UPPER:
-            licensed = dev_password == get_last_commit_date()
+            licensed = dev_password == DEV_PASSWORD
         else:
             licensed = bool(key)
         pil_images = []
