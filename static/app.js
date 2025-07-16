@@ -705,7 +705,8 @@ function renderPaymentBox(cfg) {
 
 function renderLogin(cfg) {
     if (!cfg || !cfg.google_client_id) {
-        loginArea.style.display = 'none';
+        loginArea.style.display = 'block';
+        loginArea.textContent = t('loginDisabled');
         return;
     }
     loginArea.style.display = 'block';

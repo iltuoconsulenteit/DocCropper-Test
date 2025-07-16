@@ -388,11 +388,7 @@ async def create_pdf(
         pages[0].save(pdf_bytes_io, format="PDF", save_all=True, append_images=pages[1:])
         pdf_bytes = pdf_bytes_io.getvalue()
         pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
-        if session_dir:
-            try:
-                shutil.rmtree(session_dir, ignore_errors=True)
-            except Exception:
-                logger.exception("Failed to clean session directory")
+        # Do not delete the session immediately so the user can re-export if needed
         return JSONResponse(content={"pdf": "data:application/pdf;base64," + pdf_base64})
     except Exception as e:
         logger.exception("Failed to create PDF")

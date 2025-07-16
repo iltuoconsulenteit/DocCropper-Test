@@ -41,7 +41,7 @@ The interface includes small placeholder logos encoded directly in the HTML. Rep
 The expected filenames are `header_logo.png` for the top banner and `footer_logo.png` for the footer. If these files are missing, the placeholders will be used automatically.
 Default preferences for language, PDF layout, page orientation, scaling and the HTTP server port are stored in `settings.json`. Any change you make through the interface is saved back to this file via the `/settings` API.  Edit the `port` value if you want DocCropper to listen on a different port.
 You can also configure a small payment box through `settings.json` by setting `payment_mode` to `donation` or `subscription` (the value is read case‑insensitively). By default `payment_mode` is `donation`. Provide your PayPal or Stripe link (and optional bank transfer details) using the `paypal_link`, `stripe_link` and `bank_info` fields. When enabled, the interface shows a box with those payment options so users can donate or subscribe. If no links are configured the box still appears with a notice. These boxes are visible even in demo or developer mode.
-If you supply a `google_client_id` in `settings.json`, DocCropper displays a Google sign‑in button. This uses Google's identity service so users can sign in with their Google account. After signing in, the app can associate the logged in user with a donation or subscription plan. The login box is also visible regardless of licensing.
+If you supply a `google_client_id` in `settings.json`, DocCropper displays a Google sign‑in button so users can authenticate with their Google account. Without this ID the login area simply shows a "Login not configured" message. After signing in, the app can associate the logged in user with a donation or subscription plan. The login box is visible regardless of licensing.
 Without a valid license the exported PDF shows a large "DEMO" watermark from the second page onward. For testing or demonstrations you may use a developer key placed manually in `settings.json`. License keys are compared case‑insensitively. When DocCropper detects the developer key all features are unlocked automatically. Request the developer key from **doccropper@iltuoconsulenteit.it**.
 Language JSON files live in `static/lang/`. Add additional translations by creating new `<code>lang.json</code>` files and updating the language selector.
 Processed images appear as thumbnails. Each thumbnail offers **Rotate**, **Edit**, and **Delete** buttons so you can refine the results. Click a thumbnail itself to view it in a modal overlay.
@@ -60,9 +60,9 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Supports portrait or landscape page orientation; when using two images per page, landscape arranges them horizontally
 - Images can be scaled per page: fill the cell, keep original size or apply a custom percentage
 - A margin is always kept around each image so they don't run into the edges when printed
-- Uploaded files are stored in a temporary folder unique to each browser session. The folder
-  is removed automatically after the PDF is created and old session folders are cleaned up
-  periodically
+ - Uploaded files are stored in a temporary folder unique to each browser session. The folder
+   stays available after exporting a PDF so you can regenerate it if needed. Old session
+   directories are automatically cleaned up after about an hour
 
 ---
 
