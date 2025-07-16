@@ -34,8 +34,5 @@
   "signIn": "Accedi",
   "signOut": "Esci",
   "loggedInAs": "Connesso come",
-  "signInFailed": "Accesso fallito",
-  "enterDevPassword": "Password sviluppatore",
-  "unlock": "Sblocca",
-  "invalidPassword": "Password non valida"
+  "signInFailed": "Accesso fallito"
 }

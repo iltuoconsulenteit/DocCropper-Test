@@ -34,8 +34,5 @@
   "signIn": "Sign in",
   "signOut": "Sign out",
   "loggedInAs": "Logged in as",
-  "signInFailed": "Login failed",
-  "enterDevPassword": "Developer password",
-  "unlock": "Unlock",
-  "invalidPassword": "Invalid password"
+  "signInFailed": "Login failed"
 }

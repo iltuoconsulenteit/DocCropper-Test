@@ -15,14 +15,12 @@ from fastapi.staticfiles import StaticFiles
 
 SETTINGS_FILE = "settings.json"
 # Developer license key for demonstration (case-insensitive)
-DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV")
+DEV_LICENSE_KEY = "ILTUOCONSULENTEIT-DEV"
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
-# Password required when using the developer key
-DEV_PASSWORD = os.environ.get("DOCROPPER_DEV_PASSWORD", "Messina2025!")
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
-        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "none", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
+        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "donation", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
         with open(SETTINGS_FILE, "w") as fh:
             json.dump(data, fh)
         return data
@@ -30,7 +28,7 @@ def load_settings():
         with open(SETTINGS_FILE) as fh:
             return json.load(fh)
     except Exception:
-        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "none", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
+        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "donation", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
 
 def save_settings(update: dict):
     data = load_settings()
@@ -82,16 +80,6 @@ async def google_login(token: str = Body(...)):
     except Exception as e:
         logger.exception("Google token verification failed")
         return JSONResponse(status_code=400, content={"message": "Invalid token"})
-
-
-@app.post("/verify-dev-password/")
-async def verify_dev_password(password: str = Body(...)):
-    settings = load_settings()
-    if settings.get("license_key", "").strip().upper() != DEV_LICENSE_KEY_UPPER:
-        return JSONResponse(status_code=400, content={"message": "Developer key not set"})
-    if password.strip() == DEV_PASSWORD:
-        return {"ok": True}
-    return JSONResponse(status_code=403, content={"message": "Invalid"})
 
 
 @app.post("/process-image/")
@@ -234,16 +222,14 @@ async def create_pdf(
     orientation: str = Body("portrait"),
     arrangement: str = Body("auto"),
     scale_mode: str = Body("fit"),
-    scale_percent: int = Body(100),
-    dev_password: str | None = Body(None)
+    scale_percent: int = Body(100)
 ):
     try:
         settings = load_settings()
-        key = settings.get("license_key", "").upper()
+        key = settings.get("license_key", "").strip().upper()
+        licensed = bool(key)
         if key == DEV_LICENSE_KEY_UPPER:
-            licensed = dev_password == DEV_PASSWORD
-        else:
-            licensed = bool(key)
+            licensed = True
         pil_images = []
         for img_b64 in images:
             if img_b64.startswith('data:'):

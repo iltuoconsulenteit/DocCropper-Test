@@ -8,7 +8,7 @@
   "port": 8000,
   "license_key": "",
   "license_name": "",
-  "payment_mode": "none",
+  "payment_mode": "donation",
   "paypal_link": "",
   "stripe_link": "",
   "bank_info": "",

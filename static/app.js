@@ -32,8 +32,6 @@ const layoutPreview = document.getElementById('layoutPreview');
 const licenseInfo = document.getElementById('licenseInfo');
 const paymentBox = document.getElementById('paymentBox');
 const loginArea = document.getElementById('loginArea');
-let devUnlocked = false;
-let devPassword = '';
 
 let isLicensed = false;
 let licenseName = '';
@@ -593,9 +591,6 @@ exportPdfBtn.addEventListener('click', () => {
     const scale_mode = scaleMode.value || 'fit';
     const scale_percent = parseInt(scalePercent.value || '100');
     const payload = { images: processedImages, layout, orientation, arrangement, scale_mode, scale_percent };
-    if (devUnlocked) {
-        payload.dev_password = devPassword;
-    }
     fetch('/create-pdf/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -773,36 +768,19 @@ loadSettings().then(async (cfg) => {
     if (cfg.scale_percent !== undefined) {
         scalePercent.value = cfg.scale_percent;
     }
-    if (cfg.license_key && cfg.license_key.toUpperCase() !== DEV_KEY_UPPER) {
+    if (cfg.license_key && cfg.license_key.trim()) {
         isLicensed = true;
     }
-    if (cfg.license_name) {
-        licenseName = cfg.license_name;
-    } else if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER) {
+    if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER) {
         licenseName = 'Developer';
+    } else if (cfg.license_name) {
+        licenseName = cfg.license_name;
     }
     await loadTranslations(currentLang);
     applyTranslations();
     renderPaymentBox(cfg);
     renderLogin(cfg);
-    if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER && !devUnlocked) {
-        licenseInfo.innerHTML = `<input type="password" id="devPass" placeholder="${t('enterDevPassword')}"> <button id="devUnlock">${t('unlock')}</button>`;
-        document.getElementById('devUnlock').addEventListener('click', async () => {
-            const val = document.getElementById('devPass').value.trim();
-            const res = await fetch('/verify-dev-password/', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: val})});
-            if (res.ok) {
-                devUnlocked = true;
-                isLicensed = true;
-                devPassword = val;
-                licenseInfo.textContent = `${t('licensedTo')} ${licenseName}`;
-                applyProStatus();
-            } else {
-                alert(t('invalidPassword'));
-            }
-        });
-    } else {
-        licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
-    }
+    licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
     applyProStatus();
     updateLayoutPreview();
 });
