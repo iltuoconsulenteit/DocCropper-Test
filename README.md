@@ -60,6 +60,9 @@ Implemented with **FastAPI** + **Uvicorn**, the backend:
 - Supports portrait or landscape page orientation; when using two images per page, landscape arranges them horizontally
 - Images can be scaled per page: fill the cell, keep original size or apply a custom percentage
 - A margin is always kept around each image so they don't run into the edges when printed
+- Uploaded files are stored in a temporary folder unique to each browser session. The folder
+  is removed automatically after the PDF is created and old session folders are cleaned up
+  periodically
 
 ---
 

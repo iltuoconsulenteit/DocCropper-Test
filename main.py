@@ -4,11 +4,14 @@ import logging
 import json
 import math
 import os
+import shutil
+import time
+import uuid
 
 import cv2
 import numpy as np
 import uvicorn
-from fastapi import FastAPI, File, Form, UploadFile, Body
+from fastapi import FastAPI, File, Form, UploadFile, Body, Request
 from PIL import Image
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +20,27 @@ SETTINGS_FILE = "settings.json"
 # Developer license key for demonstration (case-insensitive)
 DEV_LICENSE_KEY = "ILTUOCONSULENTEIT-DEV"
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
+
+SESSIONS_ROOT = "sessions"
+
+def get_session_dir(session_id: str) -> str:
+    if not session_id:
+        return None
+    path = os.path.join(SESSIONS_ROOT, session_id)
+    os.makedirs(path, exist_ok=True)
+    return path
+
+def cleanup_old_sessions(max_age: int = 3600):
+    if not os.path.exists(SESSIONS_ROOT):
+        return
+    now = time.time()
+    for name in os.listdir(SESSIONS_ROOT):
+        p = os.path.join(SESSIONS_ROOT, name)
+        try:
+            if os.path.isdir(p) and now - os.path.getmtime(p) > max_age:
+                shutil.rmtree(p, ignore_errors=True)
+        except Exception:
+            pass
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -47,13 +71,21 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root():
+async def read_root(request: Request):
+    cleanup_old_sessions()
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        session_id = uuid.uuid4().hex
+    get_session_dir(session_id)
     try:
         with open("static/index.html") as f:
-            return HTMLResponse(content=f.read(), status_code=200)
+            content = f.read()
     except FileNotFoundError:
         logger.error("static/index.html not found")
         return HTMLResponse(content="Frontend not found.", status_code=500)
+    response = HTMLResponse(content=content, status_code=200)
+    response.set_cookie("session_id", session_id, httponly=True)
+    return response
 
 
 @app.get("/settings/")
@@ -84,6 +116,7 @@ async def google_login(token: str = Body(...)):
 
 @app.post("/process-image/")
 async def process_image(
+    request: Request,
     image_file: UploadFile = File(...),
     points: str = Form(...), # JSON string of points: "[x1,y1,x2,y2,x3,y3,x4,y4]"
     original_width: int = Form(...),
@@ -91,7 +124,8 @@ async def process_image(
 ):
     logger.info(f"Received image: {image_file.filename}, original_width: {original_width}, original_height: {original_height}")
     logger.info(f"Received points string (raw form data): {points}")
-
+    session_id = request.cookies.get("session_id")
+    session_dir = get_session_dir(session_id)
     try:
         # Read image
         contents = await image_file.read()
@@ -202,6 +236,14 @@ async def process_image(
 
         img_base64 = base64.b64encode(img_encoded_buffer).decode("utf-8")
 
+        if session_dir:
+            try:
+                fname = os.path.join(session_dir, f"{uuid.uuid4().hex}.png")
+                with open(fname, "wb") as fh:
+                    fh.write(img_encoded_buffer)
+            except Exception:
+                logger.exception("Failed to save processed image to session dir")
+
         return JSONResponse(content={
             "message": "Image processed successfully",
             "processed_image": "data:image/png;base64," + img_base64
@@ -217,6 +259,7 @@ async def process_image(
 
 @app.post("/create-pdf/")
 async def create_pdf(
+    request: Request,
     images: list[str] = Body(...),
     layout: int = Body(1),
     orientation: str = Body("portrait"),
@@ -230,6 +273,8 @@ async def create_pdf(
         licensed = bool(key)
         if key == DEV_LICENSE_KEY_UPPER:
             licensed = True
+        session_id = request.cookies.get("session_id")
+        session_dir = get_session_dir(session_id)
         pil_images = []
         for img_b64 in images:
             if img_b64.startswith('data:'):
@@ -343,6 +388,11 @@ async def create_pdf(
         pages[0].save(pdf_bytes_io, format="PDF", save_all=True, append_images=pages[1:])
         pdf_bytes = pdf_bytes_io.getvalue()
         pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        if session_dir:
+            try:
+                shutil.rmtree(session_dir, ignore_errors=True)
+            except Exception:
+                logger.exception("Failed to clean session directory")
         return JSONResponse(content={"pdf": "data:application/pdf;base64," + pdf_base64})
     except Exception as e:
         logger.exception("Failed to create PDF")
