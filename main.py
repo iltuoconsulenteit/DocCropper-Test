@@ -462,11 +462,16 @@ async def create_pdf(
                     font = ImageFont.truetype("DejaVuSans.ttf", font_size)
                 except Exception:
                     font = ImageFont.load_default()
-                try:
-                    bbox = draw.textbbox((0, 0), text, font=font)
+                bbox_method = getattr(draw, "textbbox", None)
+                if callable(bbox_method):
+                    bbox = bbox_method((0, 0), text, font=font)
                     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                except AttributeError:
-                    tw, th = draw.textsize(text, font=font)
+                else:
+                    size_method = getattr(draw, "textsize", None)
+                    if callable(size_method):
+                        tw, th = size_method(text, font=font)
+                    else:
+                        tw, th = font.getsize(text)
                 draw.text(
                     ((page_w - tw) / 2, (page_h - th) / 2),
                     text,
