@@ -33,9 +33,11 @@ const licenseInfo = document.getElementById('licenseInfo');
 const paymentBox = document.getElementById('paymentBox');
 const loginArea = document.getElementById('loginArea');
 const brandBox = document.getElementById('brandBox');
+const versionBox = document.getElementById('versionBox');
 
 let isLicensed = false;
 let licenseName = '';
+let appVersion = '';
 const DEV_KEY = 'ILTUOCONSULENTEIT-DEV';
 const DEV_KEY_UPPER = DEV_KEY.toUpperCase();
 let userInfo = null;
@@ -107,6 +109,9 @@ function applySettings(cfg) {
     if (brandBox) {
         brandBox.innerHTML = cfg.brand_html || '';
     }
+    if (cfg.version) {
+        appVersion = cfg.version;
+    }
 }
 
 async function loadTranslations(lang) {
@@ -160,6 +165,9 @@ function applyTranslations() {
             btn.textContent = translations[key];
         }
     });
+    if (versionBox && appVersion) {
+        versionBox.textContent = translations['version'] ? `${translations['version']} ${appVersion}` : `Version ${appVersion}`;
+    }
 }
 
 function calculateGrid() {

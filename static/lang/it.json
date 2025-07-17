@@ -35,5 +35,6 @@
   "signOut": "Esci",
   "loggedInAs": "Connesso come",
   "signInFailed": "Accesso fallito",
-  "loginDisabled": "Accesso non configurato"
+  "loginDisabled": "Accesso non configurato",
+  "version": "Versione"
 }

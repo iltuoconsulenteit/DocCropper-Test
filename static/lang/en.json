@@ -35,5 +35,6 @@
   "signOut": "Sign out",
   "loggedInAs": "Logged in as",
   "signInFailed": "Login failed",
-  "loginDisabled": "Login not configured"
+  "loginDisabled": "Login not configured",
+  "version": "Version"
 }

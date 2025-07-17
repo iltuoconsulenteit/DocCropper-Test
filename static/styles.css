@@ -50,6 +50,11 @@ h1, h2 {
     font-size: 0.9em;
 }
 
+#versionBox {
+    margin-left: 10px;
+    font-style: italic;
+}
+
 #wrapper {
     position: relative;
     border: 1px solid black;

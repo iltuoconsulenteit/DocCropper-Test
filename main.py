@@ -15,6 +15,7 @@ from fastapi import FastAPI, File, Form, UploadFile, Body, Request
 from PIL import Image
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+import subprocess
 
 SETTINGS_FILE = "settings.json"
 # Directory containing per-user settings
@@ -23,6 +24,14 @@ USERS_DIR = "users"
 # Developer license key for demonstration (case-insensitive)
 DEV_LICENSE_KEY = "ILTUOCONSULENTEIT-DEV"
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
+
+try:
+    VERSION = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=os.path.dirname(__file__),
+    ).decode().strip()
+except Exception:
+    VERSION = "unknown"
 
 SESSIONS_ROOT = "sessions"
 PID_FILE = "doccropper.pid"
@@ -147,7 +156,9 @@ async def read_root(request: Request):
 
 @app.get("/settings/")
 async def get_settings():
-    return load_settings()
+    data = load_settings()
+    data["version"] = VERSION
+    return data
 
 
 @app.post("/settings/")
@@ -160,7 +171,9 @@ async def get_user_settings_endpoint(request: Request):
     email = request.cookies.get("user_email")
     if not email:
         return JSONResponse(status_code=401, content={"message": "Not logged in"})
-    return load_user_settings(email)
+    data = load_user_settings(email)
+    data["version"] = VERSION
+    return data
 
 
 @app.post("/user-settings/")
@@ -168,7 +181,9 @@ async def update_user_settings_endpoint(request: Request, settings: dict = Body(
     email = request.cookies.get("user_email")
     if not email:
         return JSONResponse(status_code=401, content={"message": "Not logged in"})
-    return save_user_settings(email, settings)
+    data = save_user_settings(email, settings)
+    data["version"] = VERSION
+    return data
 
 
 @app.post("/google-login/")
