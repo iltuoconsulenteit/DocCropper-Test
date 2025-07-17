@@ -1,12 +1,20 @@
 import os
 import platform
 import subprocess
+import logging
 from pathlib import Path
 from pystray import Icon, Menu, MenuItem
 from PIL import Image, ImageDraw
 
 BASE_DIR = Path(__file__).resolve().parent
 INSTALL_DIR = BASE_DIR / 'install'
+
+LOG_FILE = BASE_DIR / 'doccropper_tray.log'
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s'
+)
 
 SYSTEM = platform.system()
 START_SCRIPTS = {
@@ -24,10 +32,18 @@ INSTALL_SCRIPTS = {
 
 def run_script(name, env=None):
     script = INSTALL_DIR / name
+    logging.info("Running %s", script)
+    stdout = open(LOG_FILE, 'a')
     if SYSTEM == 'Windows':
-        subprocess.Popen(['cmd', '/c', str(script)], env=env)
+        flags = 0
+        if hasattr(subprocess, 'CREATE_NO_WINDOW'):
+            flags = subprocess.CREATE_NO_WINDOW
+        subprocess.Popen(['cmd', '/c', str(script)], env=env,
+                         stdout=stdout, stderr=subprocess.STDOUT,
+                         creationflags=flags)
     else:
-        subprocess.Popen(['bash', str(script)], env=env)
+        subprocess.Popen(['bash', str(script)], env=env,
+                         stdout=stdout, stderr=subprocess.STDOUT)
 
 
 def start_app():
@@ -61,6 +77,7 @@ def create_image():
 
 def main():
     developer = os.environ.get('DOCROPPER_DEVELOPER') == '1'
+    logging.info("Tray icon started (developer=%s)", developer)
     menu_items = [
         MenuItem('Start DocCropper', lambda icon, item: start_app()),
         MenuItem('Stop DocCropper', lambda icon, item: stop_app()),
@@ -71,7 +88,10 @@ def main():
     menu_items.append(MenuItem('Quit', quit_app))
 
     icon = Icon('DocCropper', create_image(), 'DocCropper', menu=Menu(*menu_items))
-    icon.run()
+    try:
+        icon.run()
+    except Exception as e:
+        logging.exception("Tray icon error: %s", e)
 
 
 if __name__ == '__main__':

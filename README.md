@@ -103,9 +103,14 @@ If the application keeps running after closing the window, run the matching `sto
 ### 🖥 Tray icon
 
 For convenience you can run `doccropper_tray.py` which adds a small system tray
-icon. Its menu lets you start or stop the server and update it using the
-installer scripts. Set the `DOCROPPER_DEVELOPER=1` environment variable to also
-show an *Update from branch* option that respects `DOCROPPER_BRANCH`.
+icon and writes activity to `doccropper_tray.log` in the project folder. On
+Windows run it with `pythonw` (or rename it to `doccropper_tray.pyw`) so no
+console window appears. The menu lets you start or stop the server and update it
+using the installer scripts. Set `DOCROPPER_DEVELOPER=1` to also show an
+*Update from branch* option that respects `DOCROPPER_BRANCH`.
+The start scripts automatically create a virtual environment and install
+`requirements.txt`, so dependencies like OpenCV are available when the server
+launches.
 
 ## 🔓 Licensing and commercial version
 
