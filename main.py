@@ -17,11 +17,31 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 SETTINGS_FILE = "settings.json"
+# Directory containing per-user settings
+USERS_DIR = "users"
+
 # Developer license key for demonstration (case-insensitive)
 DEV_LICENSE_KEY = "ILTUOCONSULENTEIT-DEV"
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
 
 SESSIONS_ROOT = "sessions"
+
+DEFAULT_SETTINGS = {
+    "language": "en",
+    "layout": 1,
+    "orientation": "portrait",
+    "arrangement": "auto",
+    "scale_mode": "fit",
+    "scale_percent": 100,
+    "port": 8000,
+    "license_key": "",
+    "license_name": "",
+    "payment_mode": "donation",
+    "paypal_link": "",
+    "stripe_link": "",
+    "bank_info": "",
+    "google_client_id": "",
+}
 
 def get_session_dir(session_id: str) -> str:
     if not session_id:
@@ -44,15 +64,17 @@ def cleanup_old_sessions(max_age: int = 3600):
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
-        data = {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "donation", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
         with open(SETTINGS_FILE, "w") as fh:
-            json.dump(data, fh)
-        return data
+            json.dump(DEFAULT_SETTINGS, fh)
+        return DEFAULT_SETTINGS.copy()
     try:
         with open(SETTINGS_FILE) as fh:
-            return json.load(fh)
+            base = json.load(fh)
+        merged = DEFAULT_SETTINGS.copy()
+        merged.update(base)
+        return merged
     except Exception:
-        return {"language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "", "payment_mode": "donation", "paypal_link": "", "stripe_link": "", "bank_info": "", "google_client_id": ""}
+        return DEFAULT_SETTINGS.copy()
 
 def save_settings(update: dict):
     data = load_settings()
@@ -60,6 +82,39 @@ def save_settings(update: dict):
     with open(SETTINGS_FILE, "w") as fh:
         json.dump(data, fh)
     return data
+
+def sanitize_email(email: str) -> str:
+    return email.replace("@", "_at_").replace(".", "_")
+
+def load_user_settings(email: str):
+    base = load_settings()
+    os.makedirs(USERS_DIR, exist_ok=True)
+    path = os.path.join(USERS_DIR, sanitize_email(email) + ".json")
+    if os.path.exists(path):
+        try:
+            with open(path) as fh:
+                user = json.load(fh)
+            base.update(user)
+        except Exception:
+            pass
+    return base
+
+def save_user_settings(email: str, update: dict):
+    os.makedirs(USERS_DIR, exist_ok=True)
+    path = os.path.join(USERS_DIR, sanitize_email(email) + ".json")
+    data = {}
+    if os.path.exists(path):
+        try:
+            with open(path) as fh:
+                data = json.load(fh)
+        except Exception:
+            data = {}
+    data.update(update)
+    with open(path, "w") as fh:
+        json.dump(data, fh)
+    merged = load_settings()
+    merged.update(data)
+    return merged
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -98,6 +153,22 @@ async def update_settings(settings: dict = Body(...)):
     return save_settings(settings)
 
 
+@app.get("/user-settings/")
+async def get_user_settings_endpoint(request: Request):
+    email = request.cookies.get("user_email")
+    if not email:
+        return JSONResponse(status_code=401, content={"message": "Not logged in"})
+    return load_user_settings(email)
+
+
+@app.post("/user-settings/")
+async def update_user_settings_endpoint(request: Request, settings: dict = Body(...)):
+    email = request.cookies.get("user_email")
+    if not email:
+        return JSONResponse(status_code=401, content={"message": "Not logged in"})
+    return save_user_settings(email, settings)
+
+
 @app.post("/google-login/")
 async def google_login(token: str = Body(...)):
     settings = load_settings()
@@ -108,7 +179,10 @@ async def google_login(token: str = Body(...)):
         from google.oauth2 import id_token
         from google.auth.transport import requests
         info = id_token.verify_oauth2_token(token, requests.Request(), client_id)
-        return {"email": info.get("email"), "name": info.get("name")}
+        resp = JSONResponse({"email": info.get("email"), "name": info.get("name")})
+        if info.get("email"):
+            resp.set_cookie("user_email", info.get("email"), httponly=True)
+        return resp
     except Exception as e:
         logger.exception("Google token verification failed")
         return JSONResponse(status_code=400, content={"message": "Invalid token"})

@@ -50,8 +50,9 @@ let currentLang = 'en';
 let currentSettings = {};
 
 async function loadSettings() {
+    const url = userInfo ? '/user-settings/' : '/settings/';
     try {
-        const resp = await fetch('/settings/');
+        const resp = await fetch(url);
         if (resp.ok) {
             return await resp.json();
         }
@@ -62,11 +63,46 @@ async function loadSettings() {
 }
 
 function saveSettings(data) {
-    fetch('/settings/', {
+    const url = userInfo ? '/user-settings/' : '/settings/';
+    fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     }).catch(e => console.error('Save settings error', e));
+}
+
+function applySettings(cfg) {
+    currentSettings = cfg;
+    if (cfg.language) {
+        currentLang = cfg.language;
+        langSelect.value = cfg.language;
+    }
+    if (cfg.layout) {
+        layoutSelect.value = cfg.layout;
+    }
+    if (cfg.orientation) {
+        orientationSelect.value = cfg.orientation;
+    }
+    if (cfg.arrangement) {
+        arrangeSelect.value = cfg.arrangement;
+    }
+    if (cfg.scale_mode) {
+        scaleMode.value = cfg.scale_mode;
+        scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
+    }
+    if (cfg.scale_percent !== undefined) {
+        scalePercent.value = cfg.scale_percent;
+    }
+    isLicensed = false;
+    licenseName = '';
+    if (cfg.license_key && cfg.license_key.trim()) {
+        isLicensed = true;
+    }
+    if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER) {
+        licenseName = 'Developer';
+    } else if (cfg.license_name) {
+        licenseName = cfg.license_name;
+    }
 }
 
 async function loadTranslations(lang) {
@@ -723,12 +759,28 @@ function renderLogin(cfg) {
                     const data = await res.json();
                     userInfo = data;
                     loginArea.innerHTML = `${t('loggedInAs')} ${data.name || data.email} <button id="signOutBtn">${t('signOut')}</button>`;
-                    document.getElementById('signOutBtn').addEventListener('click', () => {
+                    document.getElementById('signOutBtn').addEventListener('click', async () => {
                         google.accounts.id.disableAutoSelect();
                         userInfo = null;
                         loginArea.innerHTML = '';
                         renderLogin(cfg);
+                        const baseCfg = await loadSettings();
+                        applySettings(baseCfg);
+                        await loadTranslations(currentLang);
+                        applyTranslations();
+                        renderPaymentBox(baseCfg);
+                        licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
+                        applyProStatus();
+                        updateLayoutPreview();
                     });
+                    const newCfg = await loadSettings();
+                    applySettings(newCfg);
+                    await loadTranslations(currentLang);
+                    applyTranslations();
+                    renderPaymentBox(newCfg);
+                    licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
+                    applyProStatus();
+                    updateLayoutPreview();
                 } else {
                     loginArea.textContent = t('signInFailed');
                 }
@@ -748,35 +800,7 @@ function renderLogin(cfg) {
 
 // initial load of settings and translations
 loadSettings().then(async (cfg) => {
-    currentSettings = cfg;
-    if (cfg.language) {
-        currentLang = cfg.language;
-        langSelect.value = cfg.language;
-    }
-    if (cfg.layout) {
-        layoutSelect.value = cfg.layout;
-    }
-    if (cfg.orientation) {
-        orientationSelect.value = cfg.orientation;
-    }
-    if (cfg.arrangement) {
-        arrangeSelect.value = cfg.arrangement;
-    }
-    if (cfg.scale_mode) {
-        scaleMode.value = cfg.scale_mode;
-        scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
-    }
-    if (cfg.scale_percent !== undefined) {
-        scalePercent.value = cfg.scale_percent;
-    }
-    if (cfg.license_key && cfg.license_key.trim()) {
-        isLicensed = true;
-    }
-    if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER) {
-        licenseName = 'Developer';
-    } else if (cfg.license_name) {
-        licenseName = cfg.license_name;
-    }
+    applySettings(cfg);
     await loadTranslations(currentLang);
     applyTranslations();
     renderPaymentBox(cfg);
