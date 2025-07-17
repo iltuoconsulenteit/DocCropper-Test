@@ -1,0 +1,17 @@
+{
+  "language": "en",
+  "layout": 1,
+  "orientation": "portrait",
+  "arrangement": "auto",
+  "scale_mode": "fit",
+  "scale_percent": 100,
+  "port": 8000,
+  "license_key": "",
+  "license_name": "",
+  "payment_mode": "donation",
+  "paypal_link": "",
+  "stripe_link": "",
+  "bank_info": "",
+  "google_client_id": ""
+  , "brand_html": ""
+}
