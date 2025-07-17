@@ -1,6 +1,6 @@
 # DocCropper
 
-🗂️ *DocCropper* is a fork of [`varna9000/image-perspective-crop`](https://github.com/varna9000/image-perspective-crop), enhanced to support:
+🗂️ *DocCropper* is a lightweight tool for correcting document photos and assembling them into PDFs. It has grown from earlier open‑source examples and now includes:
 
 - ✅ Multi-image upload
 - 📐 Batch perspective correction
