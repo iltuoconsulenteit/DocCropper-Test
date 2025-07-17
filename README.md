@@ -99,6 +99,13 @@ A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" b
 Use `install/start_DocCropper.sh` on Linux, `install/start_DocCropper.command` on macOS or `install/start_DocCropper.bat` on Windows to run the server later. The script creates a virtual environment when needed, installs requirements and launches the app on the port defined in `settings.json`.
 If the application keeps running after closing the window, run the matching `stop_DocCropper` script to shut it down (or send a `POST` request to `/shutdown/`).
 
+### 🖥 Tray icon
+
+For convenience you can run `doccropper_tray.py` which adds a small system tray
+icon. Its menu lets you start or stop the server and update it using the
+installer scripts. Set the `DOCROPPER_DEVELOPER=1` environment variable to also
+show an *Update from branch* option that respects `DOCROPPER_BRANCH`.
+
 ## 🔓 Licensing and commercial version
 
 **DocCropper** is released under the [MIT](LICENSE.txt) license. Without a valid key the software runs in **DEMO** mode. PDFs exported in demo mode keep a large "DEMO" watermark from the second page onward, though you can still upload multiple images.
