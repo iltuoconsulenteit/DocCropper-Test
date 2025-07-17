@@ -95,6 +95,10 @@ After cloning or updating, the installer optionally asks for a license key. Leav
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" based on these settings.
 
+If `settings.json` contains the developer license key, the installer pulls updates
+from the branch specified by `DOCROPPER_BRANCH` (default
+`dgwo4q-codex/add-features-from-doccropper-project`) instead of the `main` branch.
+
 ### ▶️ Running DocCropper
 
 Use `install/start_DocCropper.sh` on Linux, `install/start_DocCropper.command` on macOS or `install/start_DocCropper.bat` on Windows to run the server later. The script creates a virtual environment when needed, installs requirements and launches the app on the port defined in `settings.json`.
@@ -108,6 +112,7 @@ Windows run it with `pythonw` (or rename it to `doccropper_tray.pyw`) so no
 console window appears. The menu lets you start or stop the server and update it
 using the installer scripts. Set `DOCROPPER_DEVELOPER=1` to also show an
 *Update from branch* option that respects `DOCROPPER_BRANCH`.
+Developer mode is automatically enabled when the developer license key is present in `settings.json`.
 The start scripts automatically create a virtual environment and install
 `requirements.txt`, so dependencies like OpenCV are available when the server
 launches.

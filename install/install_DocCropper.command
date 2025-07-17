@@ -2,7 +2,9 @@
 set -e
 
 REPO_URL="https://github.com/iltuoconsulenteit/DocCropper"
-BRANCH="main"
+DEV_KEY="${DOCROPPER_DEV_LICENSE:-ILTUOCONSULENTEIT-DEV}"
+DEV_BRANCH="${DOCROPPER_BRANCH:-dgwo4q-codex/add-features-from-doccropper-project}"
+BRANCH=${BRANCH:-}
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 # If the script sits inside the repo's install/ folder we update the parent
@@ -13,6 +15,30 @@ elif [ -d "$PARENT_DIR/.git" ]; then
   TARGET_DIR="$PARENT_DIR"
 else
   TARGET_DIR="$SCRIPT_DIR/DocCropper"
+fi
+
+# Determine branch from license if not specified
+if [ -z "$BRANCH" ]; then
+  if [ -f "$TARGET_DIR/settings.json" ]; then
+    KEY=$(python3 - <<PY
+import json,sys
+try:
+    d=json.load(open(sys.argv[1]))
+    print(d.get('license_key',''))
+except Exception:
+    print('')
+PY
+ "$TARGET_DIR/settings.json")
+    KEY=$(echo "$KEY" | tr '[:lower:]' '[:upper:]')
+    DEV_UP=$(echo "$DEV_KEY" | tr '[:lower:]' '[:upper:]')
+    if [ "$KEY" = "$DEV_UP" ]; then
+      BRANCH="$DEV_BRANCH"
+    else
+      BRANCH="main"
+    fi
+  else
+    BRANCH="main"
+  fi
 fi
 
 printf '\xF0\x9F\x94\xA7 Verifica pacchetti richiesti...\n'
@@ -72,6 +98,13 @@ with open(f, 'w') as fh:
     json.dump(data, fh)
 PY
     echo "✅ License saved"
+    DEV_UP=$(echo "$DEV_KEY" | tr '[:lower:]' '[:upper:]')
+    if [ "$UPPER_KEY" = "$DEV_UP" ]; then
+      echo "🔀 Switching to developer branch $DEV_BRANCH"
+      git -C "$TARGET_DIR" fetch origin "$DEV_BRANCH"
+      git -C "$TARGET_DIR" checkout "$DEV_BRANCH"
+      git -C "$TARGET_DIR" pull --rebase --autostash origin "$DEV_BRANCH"
+    fi
   else
     echo "❌ License key invalid. Continuing in demo mode."
   fi

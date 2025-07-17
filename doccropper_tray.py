@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from pystray import Icon, Menu, MenuItem
 from PIL import Image, ImageDraw
+import json
 
 BASE_DIR = Path(__file__).resolve().parent
 INSTALL_DIR = BASE_DIR / 'install'
@@ -29,6 +30,17 @@ INSTALL_SCRIPTS = {
     'Windows': 'install_DocCropper.bat',
     'Darwin': 'install_DocCropper.command',
 }.get(SYSTEM, 'install_DocCropper.sh')
+
+def is_developer():
+    settings_file = BASE_DIR / 'settings.json'
+    try:
+        with open(settings_file) as fh:
+            data = json.load(fh)
+        key = data.get('license_key', '').strip().upper()
+        dev = os.environ.get('DOCROPPER_DEV_LICENSE', 'ILTUOCONSULENTEIT-DEV').upper()
+        return key == dev
+    except Exception:
+        return False
 
 def run_script(name, env=None):
     script = INSTALL_DIR / name
@@ -76,7 +88,7 @@ def create_image():
 
 
 def main():
-    developer = os.environ.get('DOCROPPER_DEVELOPER') == '1'
+    developer = os.environ.get('DOCROPPER_DEVELOPER') == '1' or is_developer()
     logging.info("Tray icon started (developer=%s)", developer)
     menu_items = [
         MenuItem('Start DocCropper', lambda icon, item: start_app()),

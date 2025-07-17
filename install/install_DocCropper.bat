@@ -1,7 +1,9 @@
 @echo off
 setlocal
 set REPO_URL=https://github.com/iltuoconsulenteit/DocCropper
-set BRANCH=main
+if not defined BRANCH set BRANCH=
+if not defined DOCROPPER_DEV_LICENSE set DOCROPPER_DEV_LICENSE=ILTUOCONSULENTEIT-DEV
+if not defined DOCROPPER_BRANCH set DOCROPPER_BRANCH=dgwo4q-codex/add-features-from-doccropper-project
 set SCRIPT_DIR=%~dp0
 set PARENT_DIR=%~dp0..\
 rem If the script sits inside the repo's install folder we update the parent
@@ -12,6 +14,21 @@ if exist "%SCRIPT_DIR%\.git" (
   set TARGET_DIR=%PARENT_DIR%
 ) else (
   set TARGET_DIR=%SCRIPT_DIR%DocCropper
+)
+
+if not defined BRANCH (
+  set BRANCH=main
+  if exist "%TARGET_DIR%\settings.json" (
+    for /f %%K in ('python - <<PY
+import json,sys
+try:
+    d=json.load(open("%TARGET_DIR%\\settings.json"))
+    print(d.get("license_key",""))
+except Exception:
+    pass
+PY') do set CURKEY=%%K
+    if /I "!CURKEY!"=="%DOCROPPER_DEV_LICENSE%" set BRANCH=%DOCROPPER_BRANCH%
+  )
 )
 
 echo Checking required tools...
@@ -63,6 +80,12 @@ if not "%LIC_KEY%"=="" (
     python "%TEMP%\updlic.py"
     del "%TEMP%\updlic.py"
     echo License saved
+    if /I "%LIC_KEY%"=="%DOCROPPER_DEV_LICENSE%" (
+      echo Switching to developer branch %DOCROPPER_BRANCH%
+      git -C "%TARGET_DIR%" fetch origin %DOCROPPER_BRANCH%
+      git -C "%TARGET_DIR%" checkout %DOCROPPER_BRANCH%
+      git -C "%TARGET_DIR%" pull --rebase --autostash origin %DOCROPPER_BRANCH%
+    )
   ) else (
     echo License key invalid. Continuing in demo mode.
   )
