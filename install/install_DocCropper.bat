@@ -33,6 +33,7 @@ for %%C in (git python pip) do (
   where %%C >nul 2>&1
   if errorlevel 1 (
     echo %%C not found. Please install it first.
+    pause
     exit /b 1
   )
 )
@@ -100,4 +101,5 @@ if /I "%RUN_APP%" NEQ "n" if /I "%RUN_APP%" NEQ "N" (
   popd
 )
 endlocal
+pause
 
