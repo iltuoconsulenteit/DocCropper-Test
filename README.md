@@ -97,6 +97,7 @@ A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" b
 ### ▶️ Running DocCropper
 
 Use `install/start_DocCropper.sh` on Linux, `install/start_DocCropper.command` on macOS or `install/start_DocCropper.bat` on Windows to run the server later. The script creates a virtual environment when needed, installs requirements and launches the app on the port defined in `settings.json`.
+If the application keeps running after closing the window, run the matching `stop_DocCropper` script to shut it down (or send a `POST` request to `/shutdown/`).
 
 ## 🔓 Licensing and commercial version
 

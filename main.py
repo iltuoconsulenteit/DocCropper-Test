@@ -25,6 +25,7 @@ DEV_LICENSE_KEY = "ILTUOCONSULENTEIT-DEV"
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
 
 SESSIONS_ROOT = "sessions"
+PID_FILE = "doccropper.pid"
 
 DEFAULT_SETTINGS = {
     "language": "en",
@@ -469,10 +470,49 @@ async def create_pdf(
         logger.exception("Failed to create PDF")
         return JSONResponse(status_code=500, content={"message": f"Could not create PDF: {str(e)}"})
 
+
+@app.post("/shutdown/")
+async def shutdown():
+    server = getattr(app.state, "server", None)
+    if server:
+        server.should_exit = True
+        return {"message": "Shutting down"}
+    return {"message": "Server not running"}
+
 if __name__ == "__main__":
+    import argparse
+    import signal
+
+    parser = argparse.ArgumentParser(description="Run or control DocCropper")
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=None)
+    parser.add_argument("--stop", action="store_true", help="Stop a running instance")
+    args = parser.parse_args()
+
+    if args.stop:
+        if os.path.exists(PID_FILE):
+            try:
+                with open(PID_FILE) as fh:
+                    pid = int(fh.read().strip())
+                os.kill(pid, signal.SIGTERM)
+                print(f"Stopped DocCropper (PID {pid})")
+                os.remove(PID_FILE)
+            except Exception as e:
+                print(f"Failed to stop server: {e}")
+        else:
+            print("PID file not found. Server may not be running.")
+        raise SystemExit
+
     settings = load_settings()
+    port = args.port if args.port is not None else int(settings.get("port", 8000))
+
+    config = uvicorn.Config(app, host=args.host, port=port)
+    server = uvicorn.Server(config)
+    app.state.server = server
+    with open(PID_FILE, "w") as fh:
+        fh.write(str(os.getpid()))
     try:
-        port = int(settings.get("port", 8000))
-    except Exception:
-        port = 8000
-    uvicorn.run(app, host="0.0.0.0", port=port)
+        server.run()
+    finally:
+        if os.path.exists(PID_FILE):
+            os.remove(PID_FILE)

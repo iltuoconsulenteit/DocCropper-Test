@@ -3,3 +3,4 @@ __pycache__/
 sessions/
 users/**
 !users/.gitkeep
+doccropper.pid
