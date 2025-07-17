@@ -32,6 +32,7 @@ const layoutPreview = document.getElementById('layoutPreview');
 const licenseInfo = document.getElementById('licenseInfo');
 const paymentBox = document.getElementById('paymentBox');
 const loginArea = document.getElementById('loginArea');
+const brandBox = document.getElementById('brandBox');
 
 let isLicensed = false;
 let licenseName = '';
@@ -102,6 +103,9 @@ function applySettings(cfg) {
         licenseName = 'Developer';
     } else if (cfg.license_name) {
         licenseName = cfg.license_name;
+    }
+    if (brandBox) {
+        brandBox.innerHTML = cfg.brand_html || '';
     }
 }
 

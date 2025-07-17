@@ -41,6 +41,7 @@ DEFAULT_SETTINGS = {
     "stripe_link": "",
     "bank_info": "",
     "google_client_id": "",
+    "brand_html": "",
 }
 
 def get_session_dir(session_id: str) -> str:

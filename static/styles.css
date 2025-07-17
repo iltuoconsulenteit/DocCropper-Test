@@ -20,7 +20,8 @@ h1, h2 {
 
 #languageChoice,
 #loginArea,
-#licenseInfo {
+#licenseInfo,
+#brandBox {
     margin: 5px;
 }
 
@@ -31,6 +32,12 @@ h1, h2 {
     padding: 2px 6px;
     background-color: #f9f9f9;
     border-radius: 4px;
+}
+#brandBox {
+    font-size: 0.8em;
+    color: #333;
+    min-width: 80px;
+    text-align: right;
 }
 #loginArea button {
     margin-left: 5px;
