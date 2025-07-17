@@ -95,6 +95,8 @@ After cloning or updating, the installer optionally asks for a license key. Leav
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" based on these settings.
 
+You may also place `.env` files inside the `env/` directory to override settings using environment variables. Copy `env/.env.example` to a new file like `env/local.env` and add values such as `DOCROPPER_LICENSE_KEY` or `DOCROPPER_LICENSE_NAME`. These files are ignored by Git so your credentials stay local.
+
 When you provide the developer license key the installer clones from the branch
 specified by `DOCROPPER_BRANCH` (default
 `dgwo4q-codex/add-features-from-doccropper-project`) rather than `main`. The same
@@ -135,7 +137,11 @@ Purchasing a PRO license provides a `license.key` file and the registered licens
 
 ### 🔑 Developer key
 
-For demonstrations and testing you may use a developer key. Place this key in the `license_key` field of `settings.json`. When DocCropper detects the developer key the interface shows `Licensed to Developer` and behaves like the full version.
+For demonstrations and testing you may use a developer key. You can store it in the `license_key` field of `settings.json` or set it in an `.env` file as `DOCROPPER_LICENSE_KEY`. When DocCropper detects the developer key the interface shows `Licensed to Developer` and behaves like the full version.
 
 For commercial inquiries: **doccropper@iltuoconsulenteit.it**.
+
+## Credits
+
+This project is originally based on [varna9000/image-perspective-crop](https://github.com/varna9000/image-perspective-crop). Significant modifications and new features were added for broader usability.
 

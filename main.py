@@ -16,13 +16,20 @@ from PIL import Image
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import subprocess
+from dotenv import load_dotenv
 
 SETTINGS_FILE = "settings.json"
+# Load environment variables from any .env files in env/
+ENV_DIR = "env"
+if os.path.isdir(ENV_DIR):
+    for name in os.listdir(ENV_DIR):
+        if name.endswith(".env"):
+            load_dotenv(os.path.join(ENV_DIR, name), override=False)
 # Directory containing per-user settings
 USERS_DIR = "users"
 
 # Developer license key for demonstration (case-insensitive)
-DEV_LICENSE_KEY = "ILTUOCONSULENTEIT-DEV"
+DEV_LICENSE_KEY = os.environ.get("DOCROPPER_DEV_LICENSE", "ILTUOCONSULENTEIT-DEV")
 DEV_LICENSE_KEY_UPPER = DEV_LICENSE_KEY.upper()
 
 try:
@@ -83,6 +90,12 @@ def load_settings():
             base = json.load(fh)
         merged = DEFAULT_SETTINGS.copy()
         merged.update(base)
+        env_key = os.getenv("DOCROPPER_LICENSE_KEY")
+        env_name = os.getenv("DOCROPPER_LICENSE_NAME")
+        if env_key:
+            merged["license_key"] = env_key
+        if env_name:
+            merged["license_name"] = env_name
         return merged
     except Exception:
         return DEFAULT_SETTINGS.copy()

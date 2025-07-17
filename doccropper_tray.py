@@ -6,6 +6,7 @@ from pathlib import Path
 from pystray import Icon, Menu, MenuItem
 from PIL import Image, ImageDraw
 import json
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
 INSTALL_DIR = BASE_DIR / 'install'
@@ -17,6 +18,12 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s: %(message)s'
 )
+
+# Load environment variables from env/*.env files
+ENV_DIR = BASE_DIR / 'env'
+if ENV_DIR.is_dir():
+    for env_file in ENV_DIR.glob('*.env'):
+        load_dotenv(env_file, override=False)
 
 SYSTEM = platform.system()
 START_SCRIPTS = {
