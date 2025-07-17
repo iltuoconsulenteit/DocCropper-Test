@@ -9,6 +9,7 @@ import json
 
 BASE_DIR = Path(__file__).resolve().parent
 INSTALL_DIR = BASE_DIR / 'install'
+SCRIPTS_DIR = BASE_DIR / 'scripts'
 
 LOG_FILE = BASE_DIR / 'doccropper_tray.log'
 logging.basicConfig(
@@ -42,8 +43,8 @@ def is_developer():
     except Exception:
         return False
 
-def run_script(name, env=None):
-    script = INSTALL_DIR / name
+def run_script(name, env=None, folder=INSTALL_DIR):
+    script = folder / name
     logging.info("Running %s", script)
     stdout = open(LOG_FILE, 'a')
     if SYSTEM == 'Windows':
@@ -59,10 +60,10 @@ def run_script(name, env=None):
 
 
 def start_app():
-    run_script(START_SCRIPTS)
+    run_script(START_SCRIPTS, folder=SCRIPTS_DIR)
 
 def stop_app():
-    run_script(STOP_SCRIPTS)
+    run_script(STOP_SCRIPTS, folder=SCRIPTS_DIR)
 
 def update_main():
     env = os.environ.copy()
