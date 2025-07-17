@@ -4,42 +4,32 @@ set -e
 REPO_URL="https://github.com/iltuoconsulenteit/DocCropper"
 DEV_KEY="${DOCROPPER_DEV_LICENSE:-ILTUOCONSULENTEIT-DEV}"
 DEV_BRANCH="${DOCROPPER_BRANCH:-dgwo4q-codex/add-features-from-doccropper-project}"
-BRANCH=${BRANCH:-}
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PARENT_DIR="$(dirname "$SCRIPT_DIR")"
-# If the script sits inside the repo's install/ folder we update the parent
-# otherwise we clone into a DocCropper subfolder next to the script
-if [ -d "$SCRIPT_DIR/.git" ]; then
-  TARGET_DIR="$SCRIPT_DIR"
-elif [ -d "$PARENT_DIR/.git" ]; then
-  TARGET_DIR="$PARENT_DIR"
-else
-  TARGET_DIR="$SCRIPT_DIR/DocCropper"
-fi
+
+DEFAULT_DIR="/opt/DocCropper"
+read -r -p "Installation directory [$DEFAULT_DIR]: " TARGET_DIR
+TARGET_DIR=${TARGET_DIR:-$DEFAULT_DIR}
+mkdir -p "$TARGET_DIR"
 echo "Installing to: $TARGET_DIR"
 
-# Determine branch based on license if not specified
-if [ -z "$BRANCH" ]; then
-  if [ -f "$TARGET_DIR/settings.json" ]; then
-    KEY=$(python3 - <<PY
+DEFAULT_KEY=""
+if [ -f "$TARGET_DIR/settings.json" ]; then
+  DEFAULT_KEY=$(python3 - <<PY
 import json,sys
 try:
     d=json.load(open(sys.argv[1]))
     print(d.get('license_key',''))
 except Exception:
-    print('')
+    pass
 PY
  "$TARGET_DIR/settings.json")
-    KEY=$(echo "$KEY" | tr '[:lower:]' '[:upper:]')
-    DEV_UP=$(echo "$DEV_KEY" | tr '[:lower:]' '[:upper:]')
-    if [ "$KEY" = "$DEV_UP" ]; then
-      BRANCH="$DEV_BRANCH"
-    else
-      BRANCH="main"
-    fi
-  else
-    BRANCH="main"
-  fi
+fi
+read -r -p "🔑 Enter license key (leave blank for demo) [${DEFAULT_KEY}]: " LIC_KEY
+[ -z "$LIC_KEY" ] && LIC_KEY="$DEFAULT_KEY"
+UPPER_KEY=$(echo "$LIC_KEY" | tr '[:lower:]' '[:upper:]')
+DEV_UPPER=$(echo "$DEV_KEY" | tr '[:lower:]' '[:upper:]')
+BRANCH="main"
+if [ "$UPPER_KEY" = "$DEV_UPPER" ]; then
+  BRANCH="$DEV_BRANCH"
 fi
 
 printf '\xF0\x9F\x94\xA7 Verifica pacchetti richiesti...\n'
@@ -82,7 +72,6 @@ if [ ! -f "$SETTINGS_FILE" ]; then
 EOF
 fi
 
-read -r -p "🔑 Enter license key (leave blank for demo): " LIC_KEY
 if [ -n "$LIC_KEY" ]; then
   UPPER_KEY="$(echo "$LIC_KEY" | tr '[:lower:]' '[:upper:]')"
   DEV_KEY="${DOCROPPER_DEV_LICENSE:-ILTUOCONSULENTEIT-DEV}"

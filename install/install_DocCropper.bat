@@ -1,36 +1,32 @@
 @echo off
 setlocal
 set REPO_URL=https://github.com/iltuoconsulenteit/DocCropper
-if not defined BRANCH set BRANCH=
 if not defined DOCROPPER_DEV_LICENSE set DOCROPPER_DEV_LICENSE=ILTUOCONSULENTEIT-DEV
 if not defined DOCROPPER_BRANCH set DOCROPPER_BRANCH=dgwo4q-codex/add-features-from-doccropper-project
-set SCRIPT_DIR=%~dp0
-set PARENT_DIR=%~dp0..\
-rem If the script sits inside the repo's install folder we update the parent
-rem otherwise we create a DocCropper folder alongside the script
-if exist "%SCRIPT_DIR%\.git" (
-  set TARGET_DIR=%SCRIPT_DIR%
-) else if exist "%PARENT_DIR%\.git" (
-  set TARGET_DIR=%PARENT_DIR%
-) else (
-  set TARGET_DIR=%SCRIPT_DIR%DocCropper
-)
+
+set TARGET_DIR=
+set /p TARGET_DIR=Installation directory [%%ProgramFiles%%\DocCropper]:
+if "%TARGET_DIR%"=="" set TARGET_DIR=%ProgramFiles%\DocCropper
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 echo Installing to: %TARGET_DIR%
 
-if not defined BRANCH (
-  set BRANCH=main
-  if exist "%TARGET_DIR%\settings.json" (
-    for /f %%K in ('python - <<PY
+set DEFAULT_KEY=
+if exist "%TARGET_DIR%\settings.json" (
+  for /f "usebackq" %%K in (`python - <<PY
 import json,sys
 try:
-    d=json.load(open("%TARGET_DIR%\\settings.json"))
-    print(d.get("license_key",""))
+    print(json.load(open(sys.argv[1])).get('license_key',''))
 except Exception:
     pass
-PY') do set CURKEY=%%K
-    if /I "!CURKEY!"=="%DOCROPPER_DEV_LICENSE%" set BRANCH=%DOCROPPER_BRANCH%
-  )
+PY
+ "%TARGET_DIR%\settings.json"`) do set DEFAULT_KEY=%%K
 )
+set /p LIC_KEY=Enter license key (leave blank for demo) [%DEFAULT_KEY%]:
+if "%LIC_KEY%"=="" set LIC_KEY=%DEFAULT_KEY%
+set BRANCH=main
+if /I "%LIC_KEY%"=="%DOCROPPER_DEV_LICENSE%" set BRANCH=%DOCROPPER_BRANCH%
+
+
 
 echo Checking required tools...
 for %%C in (git python pip) do (
@@ -59,7 +55,7 @@ if not exist "%SETTINGS_FILE%" (
   echo { "language": "en", "layout": 1, "orientation": "portrait", "arrangement": "auto", "scale_mode": "fit", "scale_percent": 100, "port": 8000, "license_key": "", "license_name": "" } > "%SETTINGS_FILE%"
 )
 
-set /p LIC_KEY=Enter license key (leave blank for demo):
+rem License key already read above
 if not "%LIC_KEY%"=="" (
   >"%TEMP%\checklic.py" echo import os,sys
   >>"%TEMP%\checklic.py" echo key=sys.argv[1].strip().upper()

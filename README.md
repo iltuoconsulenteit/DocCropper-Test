@@ -88,16 +88,18 @@ You could use other server-side languages or tools for this processing (e.g. Ima
 
 ### 🛠 Install script
 
-Run `install/install_DocCropper.sh` on Linux or macOS (or double‑click `install/install_DocCropper.command` on macOS) and `install/install_DocCropper.bat` on Windows from the folder where you want the project. If the script lives inside an existing clone under `install/` it updates that copy; otherwise it creates a new `DocCropper` subfolder next to the script. During execution the installer prints the full path of the directory being used so you know exactly where DocCropper resides. Each version checks that `git`, `python3`/`python` and `pip3`/`pip` are available before pulling the latest changes with `--rebase --autostash`. At the end the script can start the application automatically using the configured port or open the tray icon.
+Run `install/install_DocCropper.sh` on Linux or macOS (or double‑click `install/install_DocCropper.command` on macOS) and `install/install_DocCropper.bat` on Windows. The installer first asks where to place DocCropper (defaults to `/opt/DocCropper` on Unix systems or `Program Files\DocCropper` on Windows) and for an optional license key. The chosen key determines whether the main branch or the developer branch is cloned. The full target directory is printed so you know exactly where DocCropper is installed. Required tools like `git`, Python and `pip` are verified before pulling the latest changes with `--rebase --autostash`. When finished the installer can immediately launch the tray icon so you may start the server.
 
 After cloning or updating, the installer optionally asks for a license key. Leaving it blank keeps the application in demo mode. If the key does not match a valid commercial or developer key the installer warns that it is invalid and continues in demo mode. Valid keys together with the licensee name are stored in `settings.json` so the interface shows "Licensed to &lt;name&gt;". After the setup completes it can launch the tray icon (`doccropper_tray.py`) so you can start or stop the server with the included start script.
 
 The application reads configuration from `settings.json` in the project root. You can pre-populate this file with your preferred defaults or edit it later.
 A small status box in the interface shows "DEMO" or "Licensed to &lt;name&gt;" based on these settings.
 
-If `settings.json` contains the developer license key, the installer pulls updates
-from the branch specified by `DOCROPPER_BRANCH` (default
-`dgwo4q-codex/add-features-from-doccropper-project`) instead of the `main` branch.
+When you provide the developer license key the installer clones from the branch
+specified by `DOCROPPER_BRANCH` (default
+`dgwo4q-codex/add-features-from-doccropper-project`) rather than `main`. The same
+branch is used when running the installer again for updates if the key remains in
+`settings.json`.
 
 ### ▶️ Running DocCropper
 
