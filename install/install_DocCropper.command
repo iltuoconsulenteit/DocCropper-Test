@@ -16,6 +16,7 @@ elif [ -d "$PARENT_DIR/.git" ]; then
 else
   TARGET_DIR="$SCRIPT_DIR/DocCropper"
 fi
+echo "Installing to: $TARGET_DIR"
 
 # Determine branch from license if not specified
 if [ -z "$BRANCH" ]; then
@@ -112,7 +113,13 @@ else
   echo "ℹ️  Demo mode enabled"
 fi
 
-read -r -p "🚀 Launch DocCropper now? [Y/n] " RUN_APP
+read -r -p "🚀 Launch DocCropper with tray icon now? [Y/n] " RUN_APP
 if [[ ! "$RUN_APP" =~ ^[Nn]$ ]]; then
-  "$SCRIPT_DIR/start_DocCropper.command"
+  pushd "$TARGET_DIR" >/dev/null
+  if command -v pythonw >/dev/null 2>&1; then
+    (pythonw doccropper_tray.py &)
+  else
+    (python3 doccropper_tray.py &)
+  fi
+  popd >/dev/null
 fi

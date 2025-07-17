@@ -15,6 +15,7 @@ if exist "%SCRIPT_DIR%\.git" (
 ) else (
   set TARGET_DIR=%SCRIPT_DIR%DocCropper
 )
+echo Installing to: %TARGET_DIR%
 
 if not defined BRANCH (
   set BRANCH=main
@@ -92,9 +93,15 @@ if not "%LIC_KEY%"=="" (
 ) else (
   echo Demo mode enabled
 )
-set /p RUN_APP=Launch DocCropper now? [Y/n]
+set /p RUN_APP=Launch DocCropper with tray icon now? [Y/n]
 if /I "%RUN_APP%" NEQ "n" if /I "%RUN_APP%" NEQ "N" (
-  call "%SCRIPT_DIR%start_DocCropper.bat"
+  pushd "%TARGET_DIR%"
+  where pythonw >nul 2>&1 && (
+    start "" pythonw doccropper_tray.py
+  ) || (
+    start "" python doccropper_tray.py
+  )
+  popd
 )
 endlocal
 
