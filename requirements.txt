@@ -3,3 +3,8 @@ uvicorn
 python-multipart
 opencv-python
 numpy
+pillow
+google-auth
+
+pystray
+python-dotenv

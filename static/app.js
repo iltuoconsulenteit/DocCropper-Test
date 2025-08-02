@@ -14,8 +14,312 @@ const fogPathElement = document.getElementById('fogPath');
 // console.log('DEBUG: fogPathElement right after declaration:', fogPathElement); 
 const imageUploadElement = document.getElementById('imageUpload');
 const submitBtn = document.getElementById('submitBtn');
+const exportPdfBtn = document.getElementById('exportPdfBtn');
+const layoutControls = document.getElementById('layoutControls');
+const layoutSelect = document.getElementById('layoutSelect');
+const orientationSelect = document.getElementById('orientationSelect');
+const arrangeSelect = document.getElementById('arrangeSelect');
+const scaleMode = document.getElementById('scaleMode');
+const scalePercent = document.getElementById('scalePercent');
 const processedImageElement = document.getElementById('processedImage');
+const processedGallery = document.getElementById('processedGallery');
 const statusMessageElement = document.getElementById('statusMessage');
+const imageModal = document.getElementById('imageModal');
+const modalImage = document.getElementById('modalImage');
+const closeModal = document.getElementById('closeModal');
+const langSelect = document.getElementById('langSelect');
+const layoutPreview = document.getElementById('layoutPreview');
+const licenseInfo = document.getElementById('licenseInfo');
+const paymentBox = document.getElementById('paymentBox');
+const loginArea = document.getElementById('loginArea');
+const brandBox = document.getElementById('brandBox');
+const versionBox = document.getElementById('versionBox');
+
+let isLicensed = false;
+let licenseName = '';
+let appVersion = '';
+const DEV_KEY = 'ILTUOCONSULENTEIT-DEV';
+const DEV_KEY_UPPER = DEV_KEY.toUpperCase();
+let userInfo = null;
+
+let files = [];
+let currentFileIndex = 0;
+let processedImages = [];
+let processedFiles = [];
+let editingIndex = null;
+
+let translations = {};
+let currentLang = 'en';
+let currentSettings = {};
+
+async function loadSettings() {
+    const url = userInfo ? '/user-settings/' : '/settings/';
+    try {
+        const resp = await fetch(url);
+        if (resp.ok) {
+            return await resp.json();
+        }
+    } catch (e) {
+        console.error('Failed to load settings', e);
+    }
+    return {};
+}
+
+function saveSettings(data) {
+    const url = userInfo ? '/user-settings/' : '/settings/';
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).catch(e => console.error('Save settings error', e));
+}
+
+function applySettings(cfg) {
+    currentSettings = cfg;
+    if (cfg.language) {
+        currentLang = cfg.language;
+        langSelect.value = cfg.language;
+    }
+    if (cfg.layout) {
+        layoutSelect.value = cfg.layout;
+    }
+    if (cfg.orientation) {
+        orientationSelect.value = cfg.orientation;
+    }
+    if (cfg.arrangement) {
+        arrangeSelect.value = cfg.arrangement;
+    }
+    if (cfg.scale_mode) {
+        scaleMode.value = cfg.scale_mode;
+        scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
+    }
+    if (cfg.scale_percent !== undefined) {
+        scalePercent.value = cfg.scale_percent;
+    }
+    isLicensed = false;
+    licenseName = '';
+    if (cfg.license_key && cfg.license_key.trim()) {
+        isLicensed = true;
+    }
+    if ((cfg.license_key || '').toUpperCase() === DEV_KEY_UPPER) {
+        licenseName = 'Developer';
+    } else if (cfg.license_name) {
+        licenseName = cfg.license_name;
+    }
+    if (brandBox) {
+        brandBox.innerHTML = cfg.brand_html || '';
+    }
+    if (cfg.version) {
+        appVersion = cfg.version;
+    }
+}
+
+async function loadTranslations(lang) {
+    try {
+        const resp = await fetch(`/static/lang/${lang}.json`);
+        translations = await resp.json();
+    } catch (e) {
+        translations = {};
+    }
+}
+
+function t(key) {
+    return translations[key] || key;
+}
+
+function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (translations[k]) {
+            el.textContent = translations[k];
+        }
+    });
+    // also update dynamic option labels
+    orientationSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    scaleMode.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    langSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    arrangeSelect.querySelectorAll('option').forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (translations[k]) {
+            opt.textContent = translations[k];
+        }
+    });
+    processedGallery.querySelectorAll('.thumbButtons button').forEach(btn => {
+        const key = btn.dataset.key;
+        if (translations[key]) {
+            btn.textContent = translations[key];
+        }
+    });
+    if (versionBox && appVersion) {
+        versionBox.textContent = translations['version'] ? `${translations['version']} ${appVersion}` : `Version ${appVersion}`;
+    }
+}
+
+function calculateGrid() {
+    const layout = parseInt(layoutSelect.value || '1');
+    const orientation = orientationSelect.value || 'portrait';
+    const arrangement = arrangeSelect.value || 'auto';
+    let cols = 1, rows = 1;
+    if (layout === 2) {
+        if (arrangement === 'horizontal') {
+            cols = 2; rows = 1;
+        } else if (arrangement === 'vertical') {
+            cols = 1; rows = 2;
+        } else if (arrangement === 'auto') {
+            if (orientation === 'landscape') { cols = 2; rows = 1; } else { cols = 1; rows = 2; }
+        }
+    } else if (layout === 4) {
+        if (arrangement === 'horizontal') {
+            cols = 4; rows = 1;
+        } else if (arrangement === 'vertical') {
+            cols = 1; rows = 4;
+        } else { // grid or auto
+            cols = 2; rows = 2;
+        }
+    }
+    return {cols, rows};
+}
+
+function updateLayoutPreview() {
+    const {cols, rows} = calculateGrid();
+    layoutPreview.innerHTML = '';
+    const orientation = orientationSelect.value || 'portrait';
+    layoutPreview.style.display = 'block';
+    layoutPreview.style.width = orientation === 'portrait' ? '200px' : '250px';
+    layoutPreview.style.height = orientation === 'portrait' ? '250px' : '200px';
+    layoutPreview.style.display = 'grid';
+    layoutPreview.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    layoutPreview.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    const total = cols * rows;
+    for (let i = 0; i < total; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        layoutPreview.appendChild(cell);
+    }
+}
+
+function openModal(src) {
+    modalImage.src = src;
+    imageModal.style.display = 'block';
+}
+
+function rotateImage(index) {
+    const img = new Image();
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.height;
+        canvas.height = img.width;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        const rotatedData = canvas.toDataURL('image/png');
+        processedImages[index] = rotatedData;
+        const container = processedGallery.children[index];
+        container.querySelector('img').src = rotatedData;
+        if (imageModal.style.display === 'block') {
+            openModal(rotatedData);
+        }
+    };
+    img.src = processedImages[index];
+}
+
+function deleteImage(index) {
+    processedImages.splice(index, 1);
+    processedFiles.splice(index, 1);
+    processedGallery.removeChild(processedGallery.children[index]);
+    if (processedImages.length === 0) {
+        exportPdfBtn.style.display = 'none';
+        layoutControls.style.display = 'none';
+    }
+}
+
+function editImage(index) {
+    editingIndex = index;
+    const file = processedFiles[index];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        setupImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+    exportPdfBtn.style.display = 'none';
+    layoutControls.style.display = 'none';
+    statusMessageElement.textContent = 'Edit image and press Process Image to save.';
+}
+
+function addThumbnail(src, index) {
+    const container = document.createElement('div');
+    container.className = 'thumbContainer';
+
+    const imgEl = document.createElement('img');
+    imgEl.src = src;
+    imgEl.addEventListener('click', () => {
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        openModal(processedImages[idx]);
+    });
+    container.appendChild(imgEl);
+
+    const btns = document.createElement('div');
+    btns.className = 'thumbButtons';
+
+    const rotateBtn = document.createElement('button');
+    rotateBtn.dataset.key = 'rotate';
+    rotateBtn.textContent = t('rotate');
+    rotateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        rotateImage(idx);
+    });
+    btns.appendChild(rotateBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.dataset.key = 'edit';
+    editBtn.textContent = t('edit');
+    editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        editImage(idx);
+    });
+    btns.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.dataset.key = 'delete';
+    delBtn.textContent = t('delete');
+    delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = Array.from(processedGallery.children).indexOf(container);
+        deleteImage(idx);
+    });
+    btns.appendChild(delBtn);
+
+    container.appendChild(btns);
+    processedGallery.appendChild(container);
+}
+
+closeModal.addEventListener('click', () => {
+    imageModal.style.display = 'none';
+});
+
+imageModal.addEventListener('click', (e) => {
+    if (e.target === imageModal) {
+        imageModal.style.display = 'none';
+    }
+});
 
 const draggableElements = {
     p1: document.getElementById('p1'),
@@ -194,13 +498,20 @@ function setupImage(imageUrl) {
 
 
 imageUploadElement.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
+    files = Array.from(event.target.files);
+    currentFileIndex = 0;
+    processedImages = [];
+    processedFiles = [];
+    editingIndex = null;
+    processedGallery.innerHTML = '';
+    exportPdfBtn.style.display = 'none';
+    layoutControls.style.display = 'none';
+    if (files.length > 0) {
         const reader = new FileReader();
         reader.onload = (e) => {
             setupImage(e.target.result);
-        }
-        reader.readAsDataURL(file);
+        };
+        reader.readAsDataURL(files[0]);
     }
 });
 
@@ -208,7 +519,8 @@ interact('.draggable').draggable({
     modifiers: [
         interact.modifiers.restrictRect({
             restriction: 'parent',
-            endOnly: false
+            endOnly: false,
+            elementRect: { left: 0.5, top: 0.5, right: 0.5, bottom: 0.5 }
         })
     ],
     listeners: {
@@ -254,8 +566,9 @@ submitBtn.addEventListener('click', () => {
     // console.log(`origW (natural): ${origW}, origH (natural): ${origH}`);
     // console.log("pointsForBackend (scaled to original image):", JSON.stringify(pointsForBackend));
 
+    const currentFile = editingIndex !== null ? processedFiles[editingIndex] : files[currentFileIndex];
     const formData = new FormData();
-    formData.append('image_file', imageUploadElement.files[0]);
+    formData.append('image_file', currentFile);
     formData.append('points', JSON.stringify(pointsForBackend));
     formData.append('original_width', Math.round(origW));
     formData.append('original_height', Math.round(origH));
@@ -271,11 +584,39 @@ submitBtn.addEventListener('click', () => {
         return response.json();
     })
     .then(data => {
-        // console.log('Response from backend:', data);
         if (data.processed_image) {
             processedImageElement.src = data.processed_image;
-            processedImageElement.style.display = 'block';
-            statusMessageElement.textContent = 'Image processed successfully!';
+            openModal(data.processed_image);
+            if (editingIndex !== null) {
+                processedImages[editingIndex] = data.processed_image;
+                const container = processedGallery.children[editingIndex];
+                container.querySelector('img').src = data.processed_image;
+                editingIndex = null;
+                statusMessageElement.textContent = 'Image reprocessed.';
+                wrapperElement.style.display = 'none';
+                exportPdfBtn.style.display = 'inline-block';
+                layoutControls.style.display = 'block';
+                updateLayoutPreview();
+            } else {
+                processedImages.push(data.processed_image);
+                processedFiles.push(currentFile);
+                addThumbnail(data.processed_image, processedImages.length - 1);
+                currentFileIndex++;
+                if (currentFileIndex < files.length) {
+                    statusMessageElement.textContent = 'Image processed. Load next...';
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        setupImage(e.target.result);
+                    };
+                    reader.readAsDataURL(files[currentFileIndex]);
+                } else {
+                    statusMessageElement.textContent = 'All images processed.';
+                    wrapperElement.style.display = 'none';
+                    exportPdfBtn.style.display = 'inline-block';
+                    layoutControls.style.display = 'block';
+                    updateLayoutPreview();
+                }
+            }
         } else {
             statusMessageElement.textContent = data.message || 'Failed to process image.';
         }
@@ -284,6 +625,201 @@ submitBtn.addEventListener('click', () => {
         console.error('Error submitting for processing:', error);
         statusMessageElement.textContent = `Error: ${error.message}`;
     });
+});
+
+exportPdfBtn.addEventListener('click', () => {
+    if (processedImages.length === 0) {
+        statusMessageElement.textContent = 'No processed images to export.';
+        return;
+    }
+    statusMessageElement.textContent = 'Generating PDF...';
+    const layout = parseInt(layoutSelect.value || '1');
+    const orientation = orientationSelect.value || 'portrait';
+    const arrangement = arrangeSelect.value || 'auto';
+    const scale_mode = scaleMode.value || 'fit';
+    const scale_percent = parseInt(scalePercent.value || '100');
+    const payload = { images: processedImages, layout, orientation, arrangement, scale_mode, scale_percent };
+    fetch('/create-pdf/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.detail || err.message || `HTTP error! status: ${response.status}`) });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.pdf) {
+            const link = document.createElement('a');
+            link.href = data.pdf;
+            link.download = 'documents.pdf';
+            link.click();
+            statusMessageElement.textContent = 'PDF generated.';
+        } else {
+            statusMessageElement.textContent = data.message || 'Failed to create PDF.';
+        }
+    })
+    .catch(error => {
+        console.error('Error creating PDF:', error);
+        statusMessageElement.textContent = `Error: ${error.message}`;
+    });
+});
+
+langSelect.addEventListener('change', async () => {
+    currentLang = langSelect.value;
+    await loadTranslations(currentLang);
+    applyTranslations();
+    renderPaymentBox(currentSettings);
+    saveSettings({ language: currentLang });
+});
+
+layoutSelect.addEventListener('change', () => {
+    updateLayoutPreview();
+    saveSettings({ layout: parseInt(layoutSelect.value || '1') });
+});
+
+orientationSelect.addEventListener('change', () => {
+    updateLayoutPreview();
+    saveSettings({ orientation: orientationSelect.value });
+});
+
+arrangeSelect.addEventListener('change', () => {
+    updateLayoutPreview();
+    saveSettings({ arrangement: arrangeSelect.value });
+});
+
+scaleMode.addEventListener('change', () => {
+    scalePercent.style.display = scaleMode.value === 'percent' ? 'inline-block' : 'none';
+    saveSettings({ scale_mode: scaleMode.value, scale_percent: parseInt(scalePercent.value || '100') });
+});
+
+scalePercent.addEventListener('change', () => {
+    saveSettings({ scale_percent: parseInt(scalePercent.value || '100') });
+});
+
+function applyProStatus() {
+    // In demo mode features remain usable but PDF pages beyond the first
+    // will include a DEMO watermark. We simply update the button style
+    // to reflect the license status without disabling functionality.
+    if (!isLicensed) {
+        exportPdfBtn.classList.remove('pro-disabled');
+        imageUploadElement.multiple = true;
+    } else {
+        exportPdfBtn.classList.remove('pro-disabled');
+        imageUploadElement.multiple = true;
+    }
+}
+
+function renderPaymentBox(cfg) {
+    if (!cfg || !cfg.payment_mode) {
+        paymentBox.style.display = 'none';
+        return;
+    }
+    const mode = cfg.payment_mode.toLowerCase();
+    if (mode === 'none') {
+        paymentBox.style.display = 'none';
+        return;
+    }
+    paymentBox.style.display = 'block';
+    let html = `<h3>${t('support')}</h3><ul>`;
+    let hasItem = false;
+    if (mode === 'donation') {
+        if (cfg.paypal_link) {
+            html += `<li><a href="${cfg.paypal_link}" target="_blank">${t('donatePaypal')}</a></li>`;
+            hasItem = true;
+        }
+    } else if (mode === 'subscription') {
+        if (cfg.paypal_link) {
+            html += `<li><a href="${cfg.paypal_link}" target="_blank">${t('payPaypal')}</a></li>`;
+            hasItem = true;
+        }
+        if (cfg.stripe_link) {
+            html += `<li><a href="${cfg.stripe_link}" target="_blank">${t('payStripe')}</a></li>`;
+            hasItem = true;
+        }
+        if (cfg.bank_info) {
+            html += `<li>${t('bankInfo')}: ${cfg.bank_info}</li>`;
+            hasItem = true;
+        }
+    }
+    if (!hasItem) {
+        html += `<li>${t('noPaymentInfo')}</li>`;
+    }
+    html += '</ul>';
+    paymentBox.innerHTML = html;
+}
+
+function renderLogin(cfg) {
+    if (!cfg || !cfg.google_client_id) {
+        loginArea.style.display = 'block';
+        loginArea.textContent = t('loginDisabled');
+        return;
+    }
+    loginArea.style.display = 'block';
+    function init() {
+        google.accounts.id.initialize({
+            client_id: cfg.google_client_id,
+            callback: async (response) => {
+                const res = await fetch('/google-login/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: response.credential})
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    userInfo = data;
+                    loginArea.innerHTML = `${t('loggedInAs')} ${data.name || data.email} <button id="signOutBtn">${t('signOut')}</button>`;
+                    document.getElementById('signOutBtn').addEventListener('click', async () => {
+                        google.accounts.id.disableAutoSelect();
+                        userInfo = null;
+                        loginArea.innerHTML = '';
+                        renderLogin(cfg);
+                        const baseCfg = await loadSettings();
+                        applySettings(baseCfg);
+                        await loadTranslations(currentLang);
+                        applyTranslations();
+                        renderPaymentBox(baseCfg);
+                        licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
+                        applyProStatus();
+                        updateLayoutPreview();
+                    });
+                    const newCfg = await loadSettings();
+                    applySettings(newCfg);
+                    await loadTranslations(currentLang);
+                    applyTranslations();
+                    renderPaymentBox(newCfg);
+                    licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
+                    applyProStatus();
+                    updateLayoutPreview();
+                } else {
+                    loginArea.textContent = t('signInFailed');
+                }
+            }
+        });
+        google.accounts.id.renderButton(loginArea, {theme: 'outline', size: 'medium'});
+    }
+    if (typeof google === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.onload = init;
+        document.head.appendChild(script);
+    } else {
+        init();
+    }
+}
+
+// initial load of settings and translations
+loadSettings().then(async (cfg) => {
+    applySettings(cfg);
+    await loadTranslations(currentLang);
+    applyTranslations();
+    renderPaymentBox(cfg);
+    renderLogin(cfg);
+    licenseInfo.textContent = isLicensed ? `${t('licensedTo')} ${licenseName}` : t('demoVersion');
+    applyProStatus();
+    updateLayoutPreview();
 });
 
 if (window.safari) {

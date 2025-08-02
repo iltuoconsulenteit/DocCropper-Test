@@ -2,15 +2,27 @@
 <html>
 <head>
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
-    <title>Document Perspective Corrector</title>
+    <title>DocCropper</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>Document Perspective Corrector</h1>
+    <header id="pageHeader">
+        <img id="headerLogo" src="/static/logos/header_logo.png" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII='" alt="DocCropper logo">
+        <div id="languageChoice">
+            <label for="langSelect" data-i18n="language">Language:</label>
+            <select id="langSelect">
+                <option value="en" data-i18n="english">English</option>
+                <option value="it" data-i18n="italian">Italiano</option>
+            </select>
+        </div>
+        <div id="loginArea"></div>
+        <div id="licenseInfo"></div>
+        <div id="brandBox"></div>
+    </header>
 
     <div>
-        <label for="imageUpload">Upload Document Image:</label>
-        <input type="file" id="imageUpload" accept="image/*">
+        <label for="imageUpload" data-i18n="uploadLabel">Upload Document Image(s):</label>
+        <input type="file" id="imageUpload" accept="image/*" capture="environment" multiple>
     </div>
 
     <div id="wrapper">
@@ -26,11 +38,53 @@
         </svg>
     </div>
 
-    <button id="submitBtn">Process Image</button>
+    <button id="submitBtn" data-i18n="processImage">Process Image</button>
+    <button id="exportPdfBtn" style="display:none;" data-i18n="exportPdf">Export PDF</button>
+    <div id="layoutControls" style="display:none;">
+        <label for="layoutSelect" data-i18n="imagesPerPage">Images per page:</label>
+        <select id="layoutSelect">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+        </select>
+        <label for="orientationSelect" data-i18n="orientation">Orientation:</label>
+        <select id="orientationSelect">
+            <option value="portrait" data-i18n="portrait">Portrait</option>
+            <option value="landscape" data-i18n="landscape">Landscape</option>
+        </select>
+        <label for="arrangeSelect" data-i18n="arrangement">Layout:</label>
+        <select id="arrangeSelect">
+            <option value="auto" data-i18n="auto">Auto</option>
+            <option value="horizontal" data-i18n="horizontal">Horizontal</option>
+            <option value="vertical" data-i18n="vertical">Vertical</option>
+            <option value="grid" data-i18n="grid">Grid</option>
+        </select>
+        <label for="scaleMode" data-i18n="scaleLabel">Image size:</label>
+        <select id="scaleMode">
+            <option value="fit" data-i18n="fill">Fill cell</option>
+            <option value="original" data-i18n="original">Original</option>
+            <option value="percent" data-i18n="percent">Scale (%)</option>
+        </select>
+        <input type="number" id="scalePercent" value="100" min="10" max="300" step="10" style="width:60px; display:none;">
+    </div>
+    <div id="layoutPreview" style="display:none;"></div>
 
-    <h2>Processed Image:</h2>
+    <h2 data-i18n="processedImages">Processed Images:</h2>
+    <div id="processedGallery"></div>
     <img id="processedImage" src="#" alt="Processed Document" style="display:none; max-width: 100%;">
+    <div id="imageModal" class="modal" style="display:none;">
+        <span id="closeModal" class="close">&times;</span>
+        <img class="modal-content" id="modalImage" src="#" alt="Full size">
+    </div>
     <p id="statusMessage"></p>
+
+    <div id="paymentBox" style="display:none;"></div>
+
+    <footer id="pageFooter">
+        <span data-i18n="realizzato">Powered by IlTuoConsulenteIT</span>
+        <span id="versionBox"></span>
+        <img id="footerLogo" src="/static/logos/footer_logo.png" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3RqqEAAAAASUVORK5CYII='" alt="IlTuoConsulenteIT logo">
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="module" src="/static/app.js"></script>
